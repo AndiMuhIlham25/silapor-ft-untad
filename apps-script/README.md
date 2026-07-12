@@ -144,3 +144,22 @@ Router kini menolak setupAdmins() bila ADMIN_SHEET sama dengan spreadsheet aduan
 1. Buat spreadsheet baru, set linknya ke `ADMIN_SHEET`.
 2. Jalankan `setupAdmins()` (membuat ulang 6 akun default — nama/edit sebelumnya hilang).
 3. Hapus tab "Admins" dari file aduan lama. Deploy ulang.
+
+## Arsip otomatis bulanan (opsional)
+
+Agar tab aktif tetap ramping saat data menumpuk, aduan bulan-bulan lama bisa
+dipindah otomatis ke spreadsheet arsip terpisah.
+
+### Setup
+1. Buat spreadsheet baru khusus arsip → tempel link ke `ARSIP_SHEET` di Code.gs.
+2. Jalankan `previewArsip()` dulu → lihat Execution log berapa yang AKAN dipindah
+   (fungsi ini TIDAK memindah apa pun, hanya menghitung — aman dicoba).
+3. Kalau sudah yakin, jalankan `arsipkanBulanLalu()` → memindahkan aduan sebelum
+   bulan berjalan ke arsip (dikelompokkan per bulan: tab "Arsip 2026-06", dst).
+4. (Opsional) Jalankan `pasangTriggerArsip()` sekali → otomatis jalan tiap tanggal 1.
+   Matikan dengan `hapusTriggerArsip()`.
+
+### Efek
+- Tab aktif hanya menyimpan aduan bulan berjalan → dashboard admin/super cepat.
+- Riwayat lama tetap aman di spreadsheet arsip (buka file arsip untuk melihat).
+- Kolom tambahan "Admin Asal" di arsip menandai tab asal tiap aduan.

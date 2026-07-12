@@ -27,16 +27,16 @@ export const PRODI = [
    fungsional:true = ditangani admin lintas-prodi (mis. persuratan),
    routing-nya diarahkan ke area fungsi, bukan ke prodi pelapor. */
 export const KATEGORI = [
-  { id: "SIGA-8", label: "SIGA-8 / Sistem Akademik", desc: "Error login, data tidak sinkron, gagal input di SIGA-8.", role: "Operator", c: "#1d4ed8" },
-  { id: "Nilai", label: "Nilai", desc: "Nilai belum masuk, salah input, konversi bermasalah.", role: "Dosen", c: "#0891b2" },
-  { id: "Jadwal & KRS", label: "Jadwal & KRS", desc: "Bentrok jadwal, KRS gagal disetujui, matkul hilang.", role: "Mahasiswa", c: "#7c3aed" },
-  { id: "Akses Akun", label: "Akses Akun", desc: "Lupa password, akun terkunci, email kampus bermasalah.", role: "Mahasiswa", c: "#db2777" },
-  { id: "Data Mahasiswa", label: "Data Mahasiswa", desc: "Ubah biodata, status aktif/cuti, sinkron PDDikti.", role: "Tendik", c: "#059669" },
-  { id: "Persuratan", label: "Persuratan", desc: "Surat aktif kuliah, keterangan, legalisir, dll (lintas prodi).", role: "Mahasiswa", c: "#ea580c", fungsional: true },
-  { id: "Lainnya", label: "Layanan Lainnya", desc: "Kendala akademik lain di luar kategori di atas.", role: "Mahasiswa", c: "#d97706" },
+  { id: "SIGA-8", label: "SIGA-8 / Sistem Akademik", desc: "Error login, data tidak sinkron, gagal input di SIGA-8.", roles: ["Mahasiswa","Dosen","Operator Prodi/Jurusan"], c: "#1d4ed8" },
+  { id: "Nilai", label: "Nilai", desc: "Nilai belum masuk, salah input, konversi bermasalah.", roles: ["Mahasiswa","Dosen"], c: "#0891b2" },
+  { id: "Jadwal & KRS", label: "Jadwal & KRS", desc: "Bentrok jadwal, KRS gagal disetujui, matkul hilang.", roles: ["Mahasiswa","Operator Prodi/Jurusan"], c: "#7c3aed" },
+  { id: "Akses Akun", label: "Akses Akun", desc: "Lupa password, akun terkunci, email kampus bermasalah.", roles: ["Mahasiswa","Dosen","Operator Prodi/Jurusan"], c: "#db2777" },
+  { id: "Data Mahasiswa", label: "Data Mahasiswa", desc: "Ubah biodata, status aktif/cuti, sinkron PDDikti.", roles: ["Mahasiswa","Operator Prodi/Jurusan"], c: "#059669" },
+  { id: "Persuratan", label: "Persuratan", desc: "Surat aktif kuliah, keterangan, legalisir, dll (lintas prodi).", roles: ["Mahasiswa","Operator Prodi/Jurusan"], c: "#ea580c", fungsional: true },
+  { id: "Lainnya", label: "Layanan Lainnya", desc: "Kendala akademik lain di luar kategori di atas.", roles: ["Mahasiswa","Dosen","Operator Prodi/Jurusan"], c: "#d97706" },
 ];
 
-export const ROLES = ["Mahasiswa", "Dosen", "Operator", "Tendik"];
+export const ROLES = ["Mahasiswa", "Dosen", "Operator Prodi/Jurusan"];
 export const PRIORITAS = ["Rendah", "Sedang", "Urgent"];
 
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import ArsipUnduh from "./ArsipUnduh.jsx";
 import { apiList, apiUpdateStatus, apiNote } from "../api.js";
 import { KATEGORI } from "../data/seed.js";
 import { statusMeta, prioMeta } from "../utils/meta.js";
@@ -135,6 +136,8 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
             Link spreadsheet akan muncul di sini setelah <b>AREA_SHEET</b> diisi di Code.gs.
           </div>
         )}
+
+        <ArsipUnduh token={token} />
 
         <div className="controls">
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nama, NIM, prodi, atau isi aduan…" />

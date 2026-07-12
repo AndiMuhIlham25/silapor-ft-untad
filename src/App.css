@@ -275,3 +275,26 @@
 
 /* honeypot anti-spam — tak terlihat manusia, terbaca bot */
 .hp-field { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+
+/* ===== Jam layanan: banner buka/tutup form ===== */
+.jam-lock { display: flex; align-items: flex-start; gap: 12px; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 16px; border-radius: 14px; margin-bottom: 18px; font-size: 13.5px; }
+.jam-lock-ic { font-size: 20px; line-height: 1; }
+.jam-lock b { color: #7f1d1d; }
+.jam-lock div div { margin-top: 3px; color: #b91c1c; font-weight: 500; }
+.jam-open { display: inline-flex; align-items: center; gap: 7px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857; padding: 7px 13px; border-radius: 999px; font-size: 12.5px; font-weight: 700; margin-bottom: 16px; }
+.form-locked .field input, .form-locked .field select, .form-locked .field textarea,
+.form-locked .chip { opacity: .55; pointer-events: none; }
+.submit:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ===== Unduh arsip ===== */
+.arsip-box { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f8fafc; border: 1px solid #e6edf5; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
+.arsip-lbl { font-size: 13px; font-weight: 700; color: #0f172a; }
+.arsip-box select { padding: 8px 12px; border: 1px solid #d7dfea; border-radius: 9px; font-size: 13px; background: #fff; }
+.arsip-btn { padding: 8px 15px; border: 0; border-radius: 9px; font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(135deg,#1d4ed8,#0891b2); cursor: pointer; }
+.arsip-btn:hover { filter: brightness(1.05); }
+.arsip-btn:disabled { opacity: .6; cursor: not-allowed; }
+.arsip-msg { font-size: 12.5px; color: #475569; }
+
+.lbl-hint { font-weight: 500; color: #94a3b8; font-size: 12px; }
+
+.log-section { margin-top: 26px; padding-top: 22px; border-top: 1px solid #eef2f7; }

@@ -32,3 +32,10 @@ export const apiChangePassword = (token, oldPassword, newPassword) =>
 export const apiAdminList = (token) => post({ action: "adminList", token });
 export const apiAdminSave = (token, admin) => post({ action: "adminSave", token, ...admin });
 export const apiAdminDelete = (token, username) => post({ action: "adminDelete", token, username });
+
+export const apiArchiveMonths = (token) => post({ action: "arsipBulan", token });
+export const apiArchiveData = (token, bulan) => post({ action: "arsipData", token, bulan });
+
+export const apiLogout = (token) => post({ action: "logout", token });
+
+export const apiLogList = (token) => post({ action: "logList", token });

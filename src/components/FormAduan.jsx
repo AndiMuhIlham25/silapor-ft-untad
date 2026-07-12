@@ -1,8 +1,15 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { KATEGORI, ROLES, PRIORITAS, PRODI } from "../data/seed.js";
+import { statusJamLayanan, JADWAL_TEKS } from "../utils/jam.js";
 
 export default function FormAduan({ form, setForm, errors, onSubmit, sending }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const [jam, setJam] = useState(statusJamLayanan());
+  useEffect(() => {
+    const t = setInterval(() => setJam(statusJamLayanan()), 30000); // cek tiap 30 dtk agar terkunci otomatis
+    return () => clearInterval(t);
+  }, []);
+  const tutup = !jam.open;
 
   return (
     <section className="sec" id="aduan">
@@ -12,7 +19,19 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
         <p>Jelaskan kendala sedetail mungkin agar cepat ditindaklanjuti ke admin yang tepat.</p>
       </div>
 
-      <div className="form-card">
+      <div className={"form-card" + (tutup ? " form-locked" : "")}>
+
+      {tutup ? (
+        <div className="jam-lock">
+          <span className="jam-lock-ic">🔒</span>
+          <div>
+            <b>Form aduan sedang tutup</b>
+            <div>Pengaduan hanya dapat dikirim pada jam layanan: <b>{JADWAL_TEKS}</b> (WITA).</div>
+          </div>
+        </div>
+      ) : (
+        <div className="jam-open">🟢 Layanan buka · {jam.jamHari} WITA</div>
+      )}
 
       {/* honeypot anti-spam: tak terlihat manusia, sering diisi bot */}
       <div className="hp-field" aria-hidden="true">
@@ -44,7 +63,10 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
             <label>Peran</label>
             <div className="chips">
               {ROLES.map((r) => (
-                <button key={r} type="button" className={"chip" + (form.role === r ? " on" : "")} onClick={() => setForm((f) => ({ ...f, role: r }))}>
+                <button key={r} type="button" className={"chip" + (form.role === r ? " on" : "")} onClick={() => setForm((f) => {
+                  const kat = KATEGORI.find((k) => k.id === f.kategori && k.roles.includes(r)) ? f.kategori : "";
+                  return { ...f, role: r, kategori: kat };
+                })}>
                   {r}
                 </button>
               ))}
@@ -54,10 +76,10 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
 
         <div className="frow">
           <div className="field">
-            <label>Kategori Masalah</label>
+            <label>Kategori Masalah <span className="lbl-hint">(sesuai peran)</span></label>
             <select className={errors.kategori ? "err" : ""} value={form.kategori} onChange={set("kategori")}>
               <option value="">Pilih kategori…</option>
-              {KATEGORI.map((k) => <option key={k.id} value={k.id}>{k.label}</option>)}
+              {KATEGORI.filter((k) => k.roles.includes(form.role)).map((k) => <option key={k.id} value={k.id}>{k.label}</option>)}
             </select>
             {errors.kategori && <div className="err-msg">Pilih salah satu kategori.</div>}
           </div>
@@ -75,8 +97,8 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
           {errors.deskripsi && <div className="err-msg">Minimal 10 karakter agar jelas.</div>}
         </div>
 
-        <button className="submit" onClick={onSubmit} disabled={sending}>
-          {sending ? "Mengirim…" : "Kirim Aduan"}
+        <button className="submit" onClick={onSubmit} disabled={sending || tutup}>
+          {tutup ? "Form Tutup — Di Luar Jam Layanan" : sending ? "Mengirim…" : "Kirim Aduan"}
         </button>
       </div>
     </section>

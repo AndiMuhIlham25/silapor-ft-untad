@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiLogout } from "../api.js";
 import AdminLogin from "./AdminLogin.jsx";
 import AdminDashboard from "./AdminDashboard.jsx";
 import SuperAdmin from "./SuperAdmin.jsx";
@@ -15,7 +16,10 @@ export default function AdminApp() {
   const persist = (s) => { localStorage.setItem(KEY, JSON.stringify(s)); setSession(s); };
 
   const onLogin = (res) => persist({ token: res.token, admin: res.admin, sheetLinks: res.sheetLinks || [] });
-  const onLogout = () => { localStorage.removeItem(KEY); setSession(null); setView("monitoring"); };
+  const onLogout = () => {
+    if (session && session.token) apiLogout(session.token);
+    localStorage.removeItem(KEY); setSession(null); setView("monitoring");
+  };
   const onProfileSaved = (updatedAdmin) => persist({ ...session, admin: { ...session.admin, ...updatedAdmin } });
 
   if (!session) return <AdminLogin onLogin={onLogin} />;

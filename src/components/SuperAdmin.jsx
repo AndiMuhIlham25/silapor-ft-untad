@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { apiAdminList, apiAdminSave, apiAdminDelete } from "../api.js";
+import { apiAdminList, apiAdminSave, apiAdminDelete, apiLogList } from "../api.js";
 import { AREAS } from "../data/seed.js";
+import ArsipUnduh from "./ArsipUnduh.jsx";
 import PasswordInput from "./PasswordInput.jsx";
 
 const EMPTY = { username: "", nama: "", email: "", nip: "", telp: "", jabatan: "", role: "admin", areas: [], password: "" };
@@ -12,6 +13,8 @@ export default function SuperAdmin({ session, onBack, onProfile, onLogout }) {
   const [edit, setEdit] = useState(null); // record being edited/created
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [logs, setLogs] = useState(null);
+  const [logBusy, setLogBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -43,6 +46,13 @@ export default function SuperAdmin({ session, onBack, onProfile, onLogout }) {
     else alert(res.error || "Gagal menghapus.");
   };
 
+  const muatLog = async () => {
+    setLogBusy(true);
+    const res = await apiLogList(token);
+    setLogBusy(false);
+    setLogs(res.ok ? res.rows : []);
+  };
+
   const areaLabel = (id) => (AREAS.find((x) => x.id === id) || {}).label || id;
 
   return (
@@ -64,6 +74,8 @@ export default function SuperAdmin({ session, onBack, onProfile, onLogout }) {
           <h3>Daftar Admin ({admins.length})</h3>
           <button className="btn-p" onClick={openNew}>+ Tambah Admin</button>
         </div>
+
+        <ArsipUnduh token={token} />
 
         <div className="tblw">
           <table className="tbl">
@@ -93,6 +105,33 @@ export default function SuperAdmin({ session, onBack, onProfile, onLogout }) {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="log-section">
+        <div className="super-top">
+          <h3>Log Aktivitas {logs && `(${logs.length})`}</h3>
+          <button className="admin-refresh" onClick={muatLog} disabled={logBusy}>{logBusy ? "Memuat…" : logs ? "Muat ulang" : "Muat log"}</button>
+        </div>
+        {logs && (
+          <div className="tblw">
+            <table className="tbl">
+              <thead><tr><th>Waktu</th><th>Aktor</th><th>Role</th><th>Aksi</th><th>Detail</th></tr></thead>
+              <tbody>
+                {logs.length === 0 ? (
+                  <tr><td colSpan={5} className="emptyrow">Belum ada aktivitas tercatat.</td></tr>
+                ) : logs.map((l, i) => (
+                  <tr key={i}>
+                    <td className="muted td-s nowrap">{l.waktu}</td>
+                    <td className="td-b">@{l.aktor}</td>
+                    <td className="muted td-s">{l.role}</td>
+                    <td><span className="tag2 tag-kat">{l.aksi}</span></td>
+                    <td className="muted td-s">{l.detail || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {edit && (

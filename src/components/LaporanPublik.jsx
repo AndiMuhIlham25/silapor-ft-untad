@@ -61,7 +61,7 @@ export default function LaporanPublik() {
         <div className="eyebrow">Monitoring Publik</div>
         <h2>Hasil Laporan Aduan</h2>
         <p>
-          Pantau status aduan secara langsung. Identitas pelapor disamarkan demi privasi.
+          Pantau status aduan bulan ini secara langsung. Identitas pelapor disamarkan demi privasi.
           <span className="live-badge"><span className="live-dot" /> Live</span>
           {updatedAt && <span className="live-upd"> · diperbarui {fmtWaktu(updatedAt)}</span>}
         </p>

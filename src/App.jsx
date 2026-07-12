@@ -6,6 +6,7 @@ import Layanan from "./components/Layanan.jsx";
 import FormAduan from "./components/FormAduan.jsx";
 import LaporanPublik from "./components/LaporanPublik.jsx";
 import Toast from "./components/Toast.jsx";
+import { statusJamLayanan, JADWAL_TEKS } from "./utils/jam.js";
 
 const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "" };
 
@@ -39,13 +40,20 @@ export default function App() {
   const fireToast = (m) => { setToast(m); setTimeout(() => setToast(null), 2800); };
 
   const pickLayanan = (k) => {
-    setForm((f) => ({ ...f, kategori: k.id, role: k.role }));
+    setForm((f) => {
+      const role = k.roles.includes(f.role) ? f.role : k.roles[0];
+      return { ...f, kategori: k.id, role };
+    });
     setErrors((e) => ({ ...e, kategori: false }));
     window.location.hash = "#beranda";
     scrollForm();
   };
 
   const submit = async () => {
+    if (!statusJamLayanan().open) {
+      fireToast("Form tutup — jam layanan: " + JADWAL_TEKS);
+      return;
+    }
     // anti-spam: honeypot terisi atau form diisi <1.2 dtk (indikasi bot)
     if (form.hp.trim() !== "" || Date.now() - formT0.current < 1200) {
       setForm(EMPTY_FORM); setErrors({}); formT0.current = Date.now();
