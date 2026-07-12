@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import ArsipUnduh from "./ArsipUnduh.jsx";
-import { apiList, apiUpdateStatus, apiNote } from "../api.js";
+import { apiList, apiUpdateStatus, apiNote, apiLogList, apiLampiran } from "../api.js";
 import { KATEGORI } from "../data/seed.js";
 import { statusMeta, prioMeta } from "../utils/meta.js";
+import { bukaBase64 } from "../utils/file.js";
 import Donut from "./Donut.jsx";
 
 export default function AdminDashboard({ session, onLogout, onProfile, onManageAdmins, isSuper }) {
@@ -17,6 +18,27 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
   const [noteItem, setNoteItem] = useState(null);
   const [noteText, setNoteText] = useState("");
   const [savingNote, setSavingNote] = useState(false);
+
+  const [lampBusy, setLampBusy] = useState(null);
+  const lihatLampiran = async (r) => {
+    setLampBusy(idOf(r));
+    const res = await apiLampiran(token, r);
+    setLampBusy(null);
+    if (res.ok) bukaBase64(res.mime, res.data);
+    else alert(res.error || "Gagal membuka lampiran.");
+  };
+
+  const [logs, setLogs] = useState(null);
+  const [logBusy, setLogBusy] = useState(false);
+  const [logExpand, setLogExpand] = useState(false);
+  const muatLog = async () => {
+    setLogBusy(true);
+    const res = await apiLogList(token);
+    setLogBusy(false);
+    setLogs(res.ok ? res.rows : []);
+    setLogExpand(false);
+  };
+  useEffect(() => { if (isSuper) muatLog(); /* eslint-disable-next-line */ }, []);
 
   const load = async () => {
     setLoading(true);
@@ -171,6 +193,11 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
                       <span className="tag2 tag-kat">{r.kategori}</span>
                       <div className="muted td-desc">{r.deskripsi}</div>
                       {r.catatan && <div className="td-note">📝 {r.catatan}</div>}
+                      {r.lampiran && (
+                        <button className="lamp-btn" onClick={() => lihatLampiran(r)} disabled={lampBusy === idOf(r)}>
+                          {lampBusy === idOf(r) ? "Membuka…" : `📎 ${r.lampiran}`}
+                        </button>
+                      )}
                     </td>
                     <td><span className="tag2" style={{ color: pm.c, background: pm.bg }}>{r.prioritas}</span></td>
                     <td><span className="tag2" style={{ color: sm.c, background: sm.bg }}>{r.status}</span></td>
@@ -185,6 +212,49 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
             </tbody>
           </table>
         </div>
+
+        {isSuper && (
+          <div className="card log-card">
+            <div className="log-card-h">
+              <div>
+                <h3>Log Aktivitas</h3>
+                <p className="cap">Aktivitas semua admin {logs && `· ${logs.length} entri`}</p>
+              </div>
+              <button className="admin-refresh" onClick={muatLog} disabled={logBusy}>
+                {logBusy ? "Memuat…" : "↻ Muat ulang"}
+              </button>
+            </div>
+            <div className="tblw log-tblw">
+              <table className="tbl">
+                <thead>
+                  <tr><th>Waktu</th><th>Aktor</th><th>Role</th><th>Aksi</th><th>Detail (Browser)</th></tr>
+                </thead>
+                <tbody>
+                  {!logs ? (
+                    <tr><td colSpan={5} className="emptyrow">Memuat log…</td></tr>
+                  ) : logs.length === 0 ? (
+                    <tr><td colSpan={5} className="emptyrow">Belum ada aktivitas tercatat.</td></tr>
+                  ) : (logExpand ? logs : logs.slice(0, 10)).map((l, i) => (
+                    <tr key={i}>
+                      <td className="muted td-s nowrap">{l.waktu}</td>
+                      <td className="td-b">@{l.aktor}</td>
+                      <td className="muted td-s">{l.role}</td>
+                      <td><span className="tag2 tag-kat">{l.aksi}</span></td>
+                      <td className="muted td-s">{l.detail || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {logs && logs.length > 10 && (
+              <div className="log-more">
+                <button className="log-more-btn" onClick={() => setLogExpand((v) => !v)}>
+                  {logExpand ? "Tampilkan lebih sedikit" : `Lihat semua (${logs.length})`}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {noteItem && (

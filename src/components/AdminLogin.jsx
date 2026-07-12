@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { apiLogin } from "../api.js";
 import PasswordInput from "./PasswordInput.jsx";
+import { namaBrowser } from "../utils/browser.js";
 
 export default function AdminLogin({ onLogin }) {
   const [u, setU] = useState("");
@@ -12,7 +13,7 @@ export default function AdminLogin({ onLogin }) {
     if (!u || !p) { setErr("Isi username dan password."); return; }
     setBusy(true);
     setErr("");
-    const res = await apiLogin(u.trim(), p);
+    const res = await apiLogin(u.trim(), p, namaBrowser());
     setBusy(false);
     if (res.ok) onLogin(res);
     else setErr(res.error || "Login gagal.");

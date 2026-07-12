@@ -8,7 +8,7 @@ import LaporanPublik from "./components/LaporanPublik.jsx";
 import Toast from "./components/Toast.jsx";
 import { statusJamLayanan, JADWAL_TEKS } from "./utils/jam.js";
 
-const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "" };
+const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "", file: null };
 
 export default function App() {
   const [hash, setHash] = useState(window.location.hash);
@@ -72,6 +72,7 @@ export default function App() {
     const payload = {
       nama: form.nama.trim(), identitas: form.identitas.trim(), prodi: form.prodi,
       role: form.role, kategori: form.kategori, prioritas: form.prioritas, deskripsi: form.deskripsi.trim(), hp: form.hp,
+      file: form.file,
     };
 
     setSending(true);

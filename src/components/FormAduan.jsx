@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { KATEGORI, ROLES, PRIORITAS, PRODI } from "../data/seed.js";
 import { statusJamLayanan, JADWAL_TEKS } from "../utils/jam.js";
+import { fileToBase64 } from "../utils/file.js";
 
 export default function FormAduan({ form, setForm, errors, onSubmit, sending }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const [jam, setJam] = useState(statusJamLayanan());
+  const [fileErr, setFileErr] = useState("");
   useEffect(() => {
     const t = setInterval(() => setJam(statusJamLayanan()), 30000); // cek tiap 30 dtk agar terkunci otomatis
     return () => clearInterval(t);
   }, []);
   const tutup = !jam.open;
+
+  const onFile = async (e) => {
+    setFileErr("");
+    const f = e.target.files && e.target.files[0];
+    if (!f) { setForm((s) => ({ ...s, file: null })); return; }
+    if (!/\.(pdf|jpe?g|png|webp)$/i.test(f.name)) { setFileErr("Hanya pdf, jpg, png, atau webp."); e.target.value = ""; return; }
+    if (f.size > 1048576) { setFileErr("Ukuran maksimal 1 MB."); e.target.value = ""; return; }
+    const data = await fileToBase64(f);
+    setForm((s) => ({ ...s, file: { name: f.name, mime: f.type, data } }));
+  };
 
   return (
     <section className="sec" id="aduan">
@@ -95,6 +107,19 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
           <label>Deskripsi Kendala</label>
           <textarea className={errors.deskripsi ? "err" : ""} value={form.deskripsi} onChange={set("deskripsi")} placeholder="Ceritakan detail: kapan terjadi, pesan error, dan yang sudah kamu coba…" />
           {errors.deskripsi && <div className="err-msg">Minimal 10 karakter agar jelas.</div>}
+        </div>
+
+        <div className="field field-mb2">
+          <label>Lampiran <span className="lbl-hint">(opsional · pdf/jpg/png · maks 1 MB)</span></label>
+          {form.file ? (
+            <div className="file-chip">
+              <span>📎 {form.file.name}</span>
+              <button type="button" onClick={() => setForm((s) => ({ ...s, file: null }))}>Hapus</button>
+            </div>
+          ) : (
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={onFile} disabled={tutup} />
+          )}
+          {fileErr && <div className="err-msg">{fileErr}</div>}
         </div>
 
         <button className="submit" onClick={onSubmit} disabled={sending || tutup}>

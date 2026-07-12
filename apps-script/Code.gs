@@ -87,7 +87,7 @@ function isFormOpen(){
 function extractId(v){ if(!v) return ""; var m=String(v).match(/\/d\/([a-zA-Z0-9_-]+)/); return m?m[1]:String(v); }
 function isUnset(v){ return !v || String(v).indexOf("TEMPEL_")===0 || String(v).indexOf("ISI_")===0; }
 function pickArea(prodi, kategori){ if(KATEGORI_FUNGSIONAL[kategori]) return KATEGORI_FUNGSIONAL[kategori]; return PRODI_AREA[prodi] || "umum"; }
-const HEADER = ["Waktu","Nama","NIM/NIP","Prodi","Peran","Kategori","Prioritas","Deskripsi","Status","Catatan","ID Aduan"];
+const HEADER = ["Waktu","Nama","NIM/NIP","Prodi","Peran","Kategori","Prioritas","Deskripsi","Status","Catatan","ID Aduan","Lampiran"];
 
 /* Nama tab per area (1 tab per prodi/area). tabOf() menyaring karakter ilegal. */
 const AREA_TAB = {
@@ -162,9 +162,9 @@ function checkSetup(){
 }
 
 /* ================= session ================= */
-function newSession(username, role, areas){
+function newSession(username, role, areas, ua){
   var token=Utilities.getUuid();
-  PropertiesService.getScriptProperties().setProperty("sess_"+token, JSON.stringify({ u:username, role:role, areas:areas, exp:Date.now()+SESSION_HOURS*3600*1000 }));
+  PropertiesService.getScriptProperties().setProperty("sess_"+token, JSON.stringify({ u:username, role:role, areas:areas, ua:ua||"", exp:Date.now()+SESSION_HOURS*3600*1000 }));
   return token;
 }
 function getSession(token){
@@ -196,6 +196,7 @@ function doPost(e){
     if(a==="changePassword")return handleChangePassword(b);
     if(a==="logout")        return handleLogout(b);
     if(a==="logList")       return handleLogList(b);
+    if(a==="lampiran")      return handleLampiran(b);
     if(a==="adminList")     return handleAdminList(b);
     if(a==="adminSave")     return handleAdminSave(b);
     if(a==="adminDelete")   return handleAdminDelete(b);
@@ -250,7 +251,18 @@ function handleSubmit(b){
   var sh=ss.getSheetByName(tab);
   if(!sh){ sh=ss.insertSheet(tab); sh.appendRow(HEADER); sh.getRange(1,1,1,HEADER.length).setFontWeight("bold"); sh.setFrozenRows(1); }
   var kode=genTicket();
-  sh.appendRow([ new Date(), safeCell(b.nama), safeCell(b.identitas), b.prodi, b.role||"-", b.kategori, b.prioritas||"-", safeCell(b.deskripsi), "Baru", "", kode ]);
+  var lampCell="";
+  if(b.file && b.file.data){
+    var fname=String(b.file.name||"lampiran");
+    if(!/\.(pdf|jpe?g|png|webp)$/i.test(fname)) return json({ok:false,error:"Tipe file tidak diizinkan (pdf/jpg/png/webp)"});
+    var bytes;
+    try{ bytes=Utilities.base64Decode(b.file.data); }catch(e){ return json({ok:false,error:"File rusak"}); }
+    if(bytes.length>1048576) return json({ok:false,error:"Ukuran file maksimal 1 MB"});
+    var blob=Utilities.newBlob(bytes, b.file.mime||"application/octet-stream", fname);
+    var file=lampiranFolder(tab).createFile(blob); // default: PRIVATE (hanya pemilik Drive)
+    lampCell=fname+LAMP_SEP+file.getId();
+  }
+  sh.appendRow([ new Date(), safeCell(b.nama), safeCell(b.identitas), b.prodi, b.role||"-", b.kategori, b.prioritas||"-", safeCell(b.deskripsi), "Baru", "", kode, lampCell ]);
   return json({ ok:true, area:area, tab:tab, ticket:kode });
 }
 
@@ -301,8 +313,8 @@ function handleLogin(b){
   var a=findAdmin(uname);
   if(!a || a.passHash!==sha256(b.password||"")){ loginFail(uname); return json({ok:false,error:"Username atau password salah"}); }
   loginReset(uname);
-  logAksi(a.username, a.role, "Login", "");
-  var token=newSession(a.username, a.role, a.areas);
+  logAksi(a.username, a.role, "Login", b.ua||"");
+  var token=newSession(a.username, a.role, a.areas, b.ua);
   return json({ ok:true, token:token, admin:profileOf(a), sheetLinks: linksForAreas(areasOf({role:a.role,areas:a.areas})) });
 }
 
@@ -316,7 +328,7 @@ function handleList(b){
     for(var j=0;j<sheets.length;j++){ var sh=sheets[j]; if(sh.getName()===ADMIN_TAB) continue; var d=sh.getDataRange().getValues(); if(!d.length||d[0][0]!=="Waktu") continue;
       for(var i=1;i<d.length;i++){ var r=d[i]; if(!r[1]) continue;
         rows.push({ ssId:ids[n], sheet:sh.getName(), row:i+1, kode:r[10]||"-", waktu:r[0], nama:r[1], identitas:r[2],
-          prodi:r[3], role:r[4], kategori:r[5], prioritas:r[6], deskripsi:r[7], status:r[8]||"Baru", catatan:r[9]||"" });
+          prodi:r[3], role:r[4], kategori:r[5], prioritas:r[6], deskripsi:r[7], status:r[8]||"Baru", catatan:r[9]||"", lampiran:(r[11]?String(r[11]).split(LAMP_SEP)[0]:"") });
       } }
   }
   rows.sort(function(x,y){ return new Date(y.waktu)-new Date(x.waktu); });
@@ -329,7 +341,7 @@ function handleUpdate(b){
   var sh=SpreadsheetApp.openById(extractId(b.ssId)).getSheetByName(b.sheet);
   if(!sh) return json({ok:false,error:"Tab tidak ditemukan"});
   sh.getRange(b.row,9).setValue(b.status);
-  logAksi(s.u, s.role, "Ubah status", b.sheet+" baris "+b.row+" -> "+b.status);
+  logAksi(s.u, s.role, "Ubah status", s.ua||"");
   return json({ok:true});
 }
 function handleNote(b){
@@ -338,8 +350,24 @@ function handleNote(b){
   var sh=SpreadsheetApp.openById(extractId(b.ssId)).getSheetByName(b.sheet);
   if(!sh) return json({ok:false,error:"Tab tidak ditemukan"});
   sh.getRange(b.row,10).setValue(safeCell(b.catatan||""));
-  logAksi(s.u, s.role, "Catatan", b.sheet+" baris "+b.row);
+  logAksi(s.u, s.role, "Catatan", s.ua||"");
   return json({ok:true});
+}
+
+/* ---- ambil lampiran (private, hanya admin berhak) ---- */
+function handleLampiran(b){
+  var s=getSession(b.token); if(!s) return json({ok:false,error:"Sesi berakhir, login ulang"});
+  if(!canEditTab(s, b.ssId, b.sheet)) return json({ok:false,error:"Tidak berhak mengakses lampiran ini"});
+  var sh; try{ sh=SpreadsheetApp.openById(extractId(b.ssId)).getSheetByName(b.sheet); }catch(e){ return json({ok:false,error:"Tab tidak ditemukan"}); }
+  if(!sh) return json({ok:false,error:"Tab tidak ditemukan"});
+  var cell=String(sh.getRange(b.row,12).getValue()||"");
+  if(!cell) return json({ok:false,error:"Tidak ada lampiran"});
+  var parts=cell.split(LAMP_SEP), name=parts[0], id=parts[1]||"";
+  if(!id) return json({ok:false,error:"Lampiran tidak valid"});
+  try{
+    var f=DriveApp.getFileById(id), blob=f.getBlob();
+    return json({ok:true, name:name, mime:blob.getContentType(), data:Utilities.base64Encode(blob.getBytes())});
+  }catch(e){ return json({ok:false,error:"File tidak dapat diambil"}); }
 }
 
 /* ---- audit log ---- */
@@ -384,7 +412,7 @@ function handleChangePassword(b){
   if(a.passHash!==sha256(b.oldPassword||"")) return json({ok:false,error:"Password lama salah"});
   if(String(b.newPassword||"").length<6) return json({ok:false,error:"Password baru minimal 6 karakter"});
   a.passHash=sha256(b.newPassword); writeAdminRow(a.row,a);
-  logAksi(s.u, s.role, "Ganti password", "");
+  logAksi(s.u, s.role, "Ganti password", s.ua||"");
   return json({ok:true});
 }
 
@@ -407,7 +435,7 @@ function handleAdminSave(b){
   if(!ex && !obj.passHash) return json({ok:false,error:"Admin baru wajib diberi password"});
   if(ex) writeAdminRow(ex.row,obj);
   else adminSheet().appendRow(adminRowValues(obj));
-  logAksi(g.s.u, "super", ex?"Edit admin":"Tambah admin", uname);
+  logAksi(g.s.u, "super", ex?"Edit admin":"Tambah admin", g.s.ua||"");
   return json({ok:true});
 }
 function handleAdminDelete(b){
@@ -418,7 +446,7 @@ function handleAdminDelete(b){
   var supers=getAdmins().filter(function(x){return x.role==="super";});
   if(a.role==="super" && supers.length<=1) return json({ok:false,error:"Minimal harus ada 1 Super Admin"});
   adminSheet().deleteRow(a.row);
-  logAksi(g.s.u, "super", "Hapus admin", a.username);
+  logAksi(g.s.u, "super", "Hapus admin", g.s.ua||"");
   return json({ok:true});
 }
 
@@ -432,6 +460,12 @@ function handleAdminDelete(b){
    - hapusTriggerArsip() : matikan otomatisasi
    ================================================================= */
 function pad2(n){ return (n<10?"0":"")+n; }
+var LAMP_SEP = "|||";
+function getOrCreateFolder(parent, name){ var it=parent.getFoldersByName(name); return it.hasNext()?it.next():parent.createFolder(name); }
+function lampiranFolder(sub){
+  var root=getOrCreateFolder(DriveApp.getRootFolder(), "SILAPOR Lampiran");
+  return getOrCreateFolder(root, sub||"umum");
+}
 
 function previewArsip(){
   var now=new Date();
@@ -476,7 +510,7 @@ function arsipkanBulanLalu(){
       for(var i=1;i<d.length;i++){ var r=d[i]; if(!r[1]) continue; var w=r[0]; var wd=(w instanceof Date)?w:new Date(w); if(isNaN(wd)) continue;
         var wy=Number(Utilities.formatDate(wd,"Asia/Makassar","yyyy")), wm=Number(Utilities.formatDate(wd,"Asia/Makassar","MM"));
         if(wy<curY||(wy===curY&&wm<curM)){
-          var base=r.slice(0,11); while(base.length<11) base.push("");
+          var base=r.slice(0,HEADER.length); while(base.length<HEADER.length) base.push("");
           var key=wy+"-"+pad2(wm);
           (byMonth[key]=byMonth[key]||[]).push(base.concat([sh.getName()]));
           delRows.push(i+1);

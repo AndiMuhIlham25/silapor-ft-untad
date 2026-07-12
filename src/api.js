@@ -16,7 +16,7 @@ async function post(payload) {
   }
 }
 
-export const apiLogin = (username, password) => post({ action: "login", username, password });
+export const apiLogin = (username, password, ua) => post({ action: "login", username, password, ua });
 export const apiList = (token) => post({ action: "list", token });
 export const apiPublic = () => post({ action: "public", token: TOKEN });
 export const apiSubmit = (payload) => post({ action: "submit", token: TOKEN, ...payload });
@@ -39,3 +39,6 @@ export const apiArchiveData = (token, bulan) => post({ action: "arsipData", toke
 export const apiLogout = (token) => post({ action: "logout", token });
 
 export const apiLogList = (token) => post({ action: "logList", token });
+
+export const apiLampiran = (token, item) =>
+  post({ action: "lampiran", token, ssId: item.ssId, sheet: item.sheet, row: item.row });

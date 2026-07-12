@@ -8,7 +8,7 @@ export default function Hero({ onBuat, onLayanan }) {
       <p>
         Portal pengaduan pelayanan sistem akademik Fakultas Teknik Universitas Tadulako.
         Laporkan kendala SIGA-8, nilai, jadwal, KRS, akses akun, atau layanan lainnya —
-        langsung diteruskan ke admin yang tepat.
+        langsung diteruskan ke admin prodi yang tepat.
       </p>
       <div className="hero-btns">
         <button className="btn-p" onClick={onBuat}>Buat Aduan Sekarang</button>

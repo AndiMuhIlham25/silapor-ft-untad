@@ -298,3 +298,22 @@
 .lbl-hint { font-weight: 500; color: #94a3b8; font-size: 12px; }
 
 .log-section { margin-top: 26px; padding-top: 22px; border-top: 1px solid #eef2f7; }
+
+/* ===== Card Log Aktivitas (dashboard super admin) ===== */
+.log-card { margin-top: 18px; }
+.log-card-h { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.log-card-h h3 { margin: 0; }
+.log-tblw { max-height: 420px; overflow-y: auto; }
+.log-tblw thead th { position: sticky; top: 0; background: #f8fafc; z-index: 1; }
+
+.log-more { text-align: center; margin-top: 12px; }
+.log-more-btn { border: 1px solid #d7dfea; background: #fff; color: #1d4ed8; font-weight: 700; font-size: 13px; padding: 9px 20px; border-radius: 10px; cursor: pointer; transition: .15s; }
+.log-more-btn:hover { background: #f1f5f9; }
+
+/* ===== Lampiran ===== */
+.file-chip { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 10px; padding: 9px 12px; font-size: 13px; }
+.file-chip button { border: 0; background: transparent; color: #dc2626; font-weight: 700; font-size: 12.5px; cursor: pointer; }
+.lamp-btn { margin-top: 7px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #bfdbfe; background: #eff6ff; color: #1d4ed8; font-weight: 700; font-size: 12px; padding: 5px 10px; border-radius: 8px; cursor: pointer; }
+.lamp-btn:hover { background: #dbeafe; }
+.lamp-btn:disabled { opacity: .6; cursor: not-allowed; }
+input[type="file"] { font-size: 13px; }
