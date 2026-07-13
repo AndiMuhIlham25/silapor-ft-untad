@@ -6,6 +6,7 @@ import Layanan from "./components/Layanan.jsx";
 import FormAduan from "./components/FormAduan.jsx";
 import LaporanPublik from "./components/LaporanPublik.jsx";
 import Toast from "./components/Toast.jsx";
+import Chatbot from "./components/Chatbot.jsx";
 import { statusJamLayanan, JADWAL_TEKS } from "./utils/jam.js";
 
 const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "", file: null };
@@ -105,6 +106,7 @@ export default function App() {
         </footer>
       </div>
       <Toast message={toast} />
+      <Chatbot />
     </>
   );
 }
