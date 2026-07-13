@@ -1,4 +1,5 @@
 import React from "react";
+import logoUntad from "../assets/logo-untad.png";
 
 const NAV = [
   { id: "beranda", label: "Beranda" },
@@ -10,7 +11,7 @@ export default function Header({ view, nav, onLoginAdmin }) {
   return (
     <header className="hd">
       <div className="hd-in">
-        <div className="crest">FT</div>
+        <img className="crest crest-img" src={logoUntad} alt="Logo Untad" />
         <div className="hd-brand">
           <b>SILAPOR FT UNTAD</b>
           <small>Pengaduan Layanan Akademik · Fakultas Teknik</small>

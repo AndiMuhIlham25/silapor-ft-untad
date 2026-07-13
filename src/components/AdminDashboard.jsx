@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import logoUntad from "../assets/logo-untad.png";
 import ArsipUnduh from "./ArsipUnduh.jsx";
 import { apiList, apiUpdateStatus, apiNote, apiLogList, apiLampiran } from "../api.js";
 import { KATEGORI } from "../data/seed.js";
@@ -103,7 +104,7 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
     <div className="admin">
       <header className="admin-hd">
         <div className="admin-hd-in">
-          <div className="crest admin-crest">FT</div>
+          <img className="crest admin-crest crest-img" src={logoUntad} alt="Logo Untad" />
           <div>
             <b>Panel Admin · {admin.nama}</b>
             <small>{admin.jabatan ? admin.jabatan + " · " : ""}{isSuper ? "Semua area" : "Area: " + (admin.areas.join(", ") || "-")}</small>

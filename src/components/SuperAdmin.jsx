@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import logoUntad from "../assets/logo-untad.png";
 import { apiAdminList, apiAdminSave, apiAdminDelete } from "../api.js";
 import { AREAS } from "../data/seed.js";
 import ArsipUnduh from "./ArsipUnduh.jsx";
@@ -50,7 +51,7 @@ export default function SuperAdmin({ session, onBack, onProfile, onLogout }) {
     <div className="admin">
       <header className="admin-hd">
         <div className="admin-hd-in">
-          <div className="crest admin-crest">FT</div>
+          <img className="crest admin-crest crest-img" src={logoUntad} alt="Logo Untad" />
           <div><b>Super Admin · Kelola Admin</b><small>Atur jabatan, area, & akses admin</small></div>
           <div className="admin-hd-r">
             <button className="admin-refresh" onClick={onBack}>← Monitoring</button>

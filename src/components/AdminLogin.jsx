@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import logoUntad from "../assets/logo-untad.png";
 import { apiLogin } from "../api.js";
 import PasswordInput from "./PasswordInput.jsx";
 import { namaBrowser } from "../utils/browser.js";
@@ -22,7 +23,7 @@ export default function AdminLogin({ onLogin }) {
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-crest">FT</div>
+        <img className="login-crest crest-img" src={logoUntad} alt="Logo Untad" />
         <h1>Login Admin</h1>
         <p className="login-sub">SILAPOR FT UNTAD · Panel Admin Prodi</p>
 
