@@ -161,6 +161,23 @@ function checkSetup(){
   Logger.log(msg); return msg;
 }
 
+/* Diagnosa isi spreadsheet aduan — Run di editor, lihat Execution log */
+function cekAduan(){
+  var ids=allSheetIds(), out=[];
+  out.push("Jumlah spreadsheet aduan terbaca: "+ids.length);
+  for(var n=0;n<ids.length;n++){
+    var ss; try{ ss=SpreadsheetApp.openById(ids[n]); }catch(e){ out.push("GAGAL buka id "+ids[n]+" -> "+e); continue; }
+    out.push("SPREADSHEET: "+ss.getName());
+    var sheets=ss.getSheets();
+    for(var j=0;j<sheets.length;j++){
+      var sh=sheets[j]; var d=sh.getDataRange().getValues();
+      var a1=d.length?String(d[0][0]):"(kosong)"; var rows=Math.max(0,d.length-1);
+      out.push("  - Tab '"+sh.getName()+"' | A1='"+a1+"' | baris data: "+rows);
+    }
+  }
+  var msg=out.join("\n"); Logger.log(msg); return msg;
+}
+
 /* ================= session ================= */
 function newSession(username, role, areas, ua){
   var token=Utilities.getUuid();
@@ -290,6 +307,7 @@ function loginGate(u){
   var raw=PropertiesService.getScriptProperties().getProperty("lf_"+u);
   if(!raw) return {locked:false};
   var o=JSON.parse(raw);
+  if(o.locked) return {locked:true, sup:true};
   if(o.until && Date.now()<o.until) return {locked:true, mins:Math.ceil((o.until-Date.now())/60000)};
   return {locked:false};
 }
@@ -297,7 +315,10 @@ function loginFail(u){
   var props=PropertiesService.getScriptProperties();
   var raw=props.getProperty("lf_"+u); var o=raw?JSON.parse(raw):{count:0};
   o.count=(o.count||0)+1;
-  if(o.count>=5){ o.until=Date.now()+15*60*1000; o.count=0; }
+  if(o.count>=6){ o.locked=true; }                       // hubungi super admin
+  else if(o.count===5){ o.until=Date.now()+5*60*1000; }  // 5 menit
+  else if(o.count===4){ o.until=Date.now()+3*60*1000; }  // 3 menit
+  else if(o.count===3){ o.until=Date.now()+1*60*1000; }  // 1 menit
   props.setProperty("lf_"+u, JSON.stringify(o));
 }
 function loginReset(u){ PropertiesService.getScriptProperties().deleteProperty("lf_"+u); }
@@ -306,7 +327,10 @@ function loginReset(u){ PropertiesService.getScriptProperties().deleteProperty("
 function handleLogin(b){
   var uname=String(b.username||"");
   var g=loginGate(uname);
-  if(g.locked) return json({ok:false,error:"Terlalu banyak percobaan gagal. Coba lagi dalam "+g.mins+" menit."});
+  if(g.locked){
+    if(g.sup) return json({ok:false,error:"Akun terkunci karena terlalu banyak percobaan. Hubungi Super Admin untuk membuka."});
+    return json({ok:false,error:"Terlalu banyak percobaan gagal. Coba lagi dalam "+g.mins+" menit."});
+  }
   if(isUnset(ADMIN_SHEET)) return json({ok:false,error:"ADMIN_SHEET belum diatur di Code.gs"});
   var sh; try { sh=adminSheet(); } catch(e){ return json({ok:false,error:"ADMIN_SHEET tidak valid / belum di-share ke akunmu"}); }
   if(!sh) return json({ok:false,error:"Tab 'Admins' belum ada — jalankan setupAdmins() dulu"});
@@ -411,7 +435,7 @@ function handleChangePassword(b){
   var a=findAdmin(s.u); if(!a) return json({ok:false,error:"Admin tidak ditemukan"});
   if(a.passHash!==sha256(b.oldPassword||"")) return json({ok:false,error:"Password lama salah"});
   if(String(b.newPassword||"").length<6) return json({ok:false,error:"Password baru minimal 6 karakter"});
-  a.passHash=sha256(b.newPassword); writeAdminRow(a.row,a);
+  a.passHash=sha256(b.newPassword); writeAdminRow(a.row,a); loginReset(s.u);
   logAksi(s.u, s.role, "Ganti password", s.ua||"");
   return json({ok:true});
 }
@@ -435,6 +459,7 @@ function handleAdminSave(b){
   if(!ex && !obj.passHash) return json({ok:false,error:"Admin baru wajib diberi password"});
   if(ex) writeAdminRow(ex.row,obj);
   else adminSheet().appendRow(adminRowValues(obj));
+  loginReset(uname);
   logAksi(g.s.u, "super", ex?"Edit admin":"Tambah admin", g.s.ua||"");
   return json({ok:true});
 }

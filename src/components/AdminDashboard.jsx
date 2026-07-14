@@ -32,22 +32,28 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
   const [logs, setLogs] = useState(null);
   const [logBusy, setLogBusy] = useState(false);
   const [logExpand, setLogExpand] = useState(false);
-  const muatLog = async () => {
-    setLogBusy(true);
+  const muatLog = async (silent) => {
+    if (!silent) setLogBusy(true);
     const res = await apiLogList(token);
-    setLogBusy(false);
+    if (!silent) setLogBusy(false);
     setLogs(res.ok ? res.rows : []);
-    setLogExpand(false);
   };
   useEffect(() => { if (isSuper) muatLog(); /* eslint-disable-next-line */ }, []);
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent) => {
+    if (!silent) setLoading(true);
     const res = await apiList(token);
     setRows(res.ok ? res.rows : []);
     if (res.sheetLinks) setLinks(res.sheetLinks);
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
+
+  // auto-refresh tiap 5 detik (tanpa kedip)
+  useEffect(() => {
+    const iv = setInterval(() => { load(true); if (isSuper) muatLog(true); }, 5000);
+    return () => clearInterval(iv);
+    /* eslint-disable-next-line */
+  }, [isSuper]);
   useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
 
   const stats = useMemo(() => ({
@@ -74,6 +80,23 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
     const okQ = !q || (r.nama + r.identitas + r.deskripsi + r.prodi + r.kategori).toLowerCase().includes(q.toLowerCase());
     return okS && okQ;
   }), [rows, q, fStatus]);
+
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  useEffect(() => { setPage(1); }, [q, fStatus, pageSize]);
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [totalPages, page]);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+  const fromN = filtered.length === 0 ? 0 : (page - 1) * pageSize + 1;
+  const toN = Math.min(page * pageSize, filtered.length);
+  const pageList = () => {
+    const out = [], win = 2;
+    for (let p = 1; p <= totalPages; p++) {
+      if (p === 1 || p === totalPages || (p >= page - win && p <= page + win)) out.push(p);
+      else if (out[out.length - 1] !== "…") out.push("…");
+    }
+    return out;
+  };
 
   const idOf = (r) => r.ssId + r.sheet + r.row;
 
@@ -118,7 +141,6 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
             ))}
             {isSuper && <button className="admin-refresh" onClick={onManageAdmins}>Kelola Admin</button>}
             <button className="admin-refresh" onClick={onProfile}>Profil</button>
-            <button className="admin-refresh" onClick={load}>↻ Muat ulang</button>
             <button className="admin-logout" onClick={onLogout}>Keluar</button>
           </div>
         </div>
@@ -179,7 +201,7 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
                 <tr><td colSpan={7} className="emptyrow">Memuat data…</td></tr>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={7} className="emptyrow">Belum ada aduan di area Anda.</td></tr>
-              ) : filtered.map((r, i) => {
+              ) : paged.map((r, i) => {
                 const sm = statusMeta(r.status), pm = prioMeta(r.prioritas);
                 const bid = idOf(r);
                 return (
@@ -214,6 +236,24 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
           </table>
         </div>
 
+        {filtered.length > 0 && (
+          <div className="pager">
+            <span className="pager-info">Menampilkan {fromN}–{toN} dari {filtered.length} aduan</span>
+            <div className="pager-ctrl">
+              <button disabled={page === 1} onClick={() => setPage(page - 1)}>‹</button>
+              {pageList().map((p, i) => p === "…"
+                ? <span key={"e" + i} className="pager-dot">…</span>
+                : <button key={p} className={p === page ? "on" : ""} onClick={() => setPage(p)}>{p}</button>)}
+              <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>›</button>
+            </div>
+            <select className="pager-size" value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+              <option value={10}>10 / halaman</option>
+              <option value={25}>25 / halaman</option>
+              <option value={50}>50 / halaman</option>
+            </select>
+          </div>
+        )}
+
         {isSuper && (
           <div className="card log-card">
             <div className="log-card-h">
@@ -221,9 +261,6 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
                 <h3>Log Aktivitas</h3>
                 <p className="cap">Aktivitas semua admin {logs && `· ${logs.length} entri`}</p>
               </div>
-              <button className="admin-refresh" onClick={muatLog} disabled={logBusy}>
-                {logBusy ? "Memuat…" : "↻ Muat ulang"}
-              </button>
             </div>
             <div className="tblw log-tblw">
               <table className="tbl">

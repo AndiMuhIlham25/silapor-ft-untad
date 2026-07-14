@@ -420,3 +420,15 @@ body { overflow-x: hidden; }
   margin-left: calc(50% - 50vw) !important;
   margin-right: calc(50% - 50vw) !important;
 }
+
+/* ===== Pagination tabel aduan ===== */
+.pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.pager-info { font-size: 12.5px; color: #64748b; }
+.pager-ctrl { display: flex; align-items: center; gap: 4px; }
+.pager-ctrl button { min-width: 34px; height: 34px; border: 1px solid #d7dfea; background: #fff; color: #334155; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.pager-ctrl button:hover:not(:disabled) { background: #f1f5f9; }
+.pager-ctrl button.on { background: linear-gradient(135deg,#1d4ed8,#0891b2); color: #fff; border-color: transparent; }
+.pager-ctrl button:disabled { opacity: .45; cursor: not-allowed; }
+.pager-dot { padding: 0 4px; color: #94a3b8; }
+.pager-size { border: 1px solid #d7dfea; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; background: #fff; color: #334155; }
+@media (max-width: 560px){ .pager { justify-content: center; } }
