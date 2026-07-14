@@ -411,3 +411,12 @@ input[type="file"] { font-size: 13px; }
 .cu-moon { top: 10%; right: 16%; }
 .cu-chip { top: 20px; right: 24px; }
 @media (max-width: 640px){ .hero-cuaca { min-height: 82vh; } }
+
+/* ===== paksa hero cuaca benar-benar full lebar layar ===== */
+body { overflow-x: hidden; }
+.hero-cuaca {
+  max-width: none !important;
+  width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+}
