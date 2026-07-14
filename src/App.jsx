@@ -90,16 +90,14 @@ export default function App() {
   return (
     <>
       <Header view={view} nav={nav} onLoginAdmin={loginAdmin} />
+      {view === "beranda" && <Hero onBuat={goBuat} onLayanan={() => nav("layanan")} />}
       <div className="wrap">
         {view === "layanan" ? (
           <div className="layanan-page"><Layanan onPick={pickLayanan} /></div>
         ) : view === "laporan" ? (
           <LaporanPublik />
         ) : (
-          <>
-            <Hero onBuat={goBuat} onLayanan={() => nav("layanan")} />
-            <FormAduan form={form} setForm={setForm} errors={errors} onSubmit={submit} sending={sending} />
-          </>
+          <FormAduan form={form} setForm={setForm} errors={errors} onSubmit={submit} sending={sending} />
         )}
         <footer className="foot">
           SILAPOR FT UNTAD — Sistem Pengaduan Layanan Akademik · Fakultas Teknik, Universitas Tadulako
