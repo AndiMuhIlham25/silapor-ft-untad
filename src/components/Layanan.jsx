@@ -4,11 +4,6 @@ import { KATEGORI } from "../data/seed.js";
 export default function Layanan({ onPick }) {
   return (
     <section className="sec" id="layanan">
-      <div className="sec-h">
-        <div className="eyebrow">Layanan</div>
-        <h2>Kategori kendala yang bisa dilaporkan</h2>
-        <p>Pilih kategori — form aduan akan otomatis terisi.</p>
-      </div>
       <div className="svc-grid">
         {KATEGORI.map((k) => (
           <button key={k.id} className="svc" onClick={() => onPick(k)}>

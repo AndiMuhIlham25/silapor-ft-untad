@@ -42,3 +42,7 @@ export const apiLogList = (token) => post({ action: "logList", token });
 
 export const apiLampiran = (token, item) =>
   post({ action: "lampiran", token, ssId: item.ssId, sheet: item.sheet, row: item.row });
+
+export const apiCekNim = (nim) => post({ action: "cekNim", token: TOKEN, nim });
+
+export const apiEditPublik = (payload) => post({ action: "editPublik", token: TOKEN, ...payload });

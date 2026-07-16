@@ -71,6 +71,7 @@ function sha256(s){
   return raw.map(function(b){ return ("0"+(b & 0xff).toString(16)).slice(-2); }).join("");
 }
 function makeHash(pw){ const h = sha256(pw); Logger.log(h); return h; }
+function normText(v){ return String(v||"").toLowerCase().replace(/\s+/g," ").trim(); }
 function safeCell(v){ var s=String(v==null?"":v); return /^[=+\-@\t\r]/.test(s) ? ("'"+s) : s; }
 function genTicket(){
   var ymd = Utilities.formatDate(new Date(), "Asia/Makassar", "yyMMdd");
@@ -87,7 +88,7 @@ function isFormOpen(){
 function extractId(v){ if(!v) return ""; var m=String(v).match(/\/d\/([a-zA-Z0-9_-]+)/); return m?m[1]:String(v); }
 function isUnset(v){ return !v || String(v).indexOf("TEMPEL_")===0 || String(v).indexOf("ISI_")===0; }
 function pickArea(prodi, kategori){ if(KATEGORI_FUNGSIONAL[kategori]) return KATEGORI_FUNGSIONAL[kategori]; return PRODI_AREA[prodi] || "umum"; }
-const HEADER = ["Waktu","Nama","NIM/NIP","Prodi","Peran","Kategori","Prioritas","Deskripsi","Status","Catatan","ID Aduan","Lampiran"];
+const HEADER = ["Waktu","Nama","Stambuk/NIP","Prodi","Peran","Kategori","Prioritas","Deskripsi","Status","Catatan","ID Aduan","Lampiran"];
 
 /* Nama tab per area (1 tab per prodi/area). tabOf() menyaring karakter ilegal. */
 const AREA_TAB = {
@@ -205,6 +206,8 @@ function doPost(e){
     var a=b.action||"submit";
     if(a==="submit")        return handleSubmit(b);
     if(a==="public")        return handlePublic(b);
+    if(a==="cekNim")        return handleCekNim(b);
+    if(a==="editPublik")    return handleEditPublik(b);
     if(a==="login")         return handleLogin(b);
     if(a==="list")          return handleList(b);
     if(a==="updateStatus")  return handleUpdate(b);
@@ -267,6 +270,32 @@ function handleSubmit(b){
   var tab=adminForArea(area); // 1 tab per admin
   var sh=ss.getSheetByName(tab);
   if(!sh){ sh=ss.insertSheet(tab); sh.appendRow(HEADER); sh.getRange(1,1,1,HEADER.length).setFontWeight("bold"); sh.setFrozenRows(1); }
+  // ---- anti-duplikat: cek riwayat Stambuk ini di tab tujuan ----
+  var dd=sh.getDataRange().getValues(), now=new Date();
+  var nimQ=normText(b.identitas), katQ=b.kategori, descQ=normText(b.deskripsi);
+  var hardDup=null, openDup=null, count24=0;
+  for(var i=1;i<dd.length;i++){
+    var rr=dd[i]; if(!rr[1]) continue;
+    if(normText(rr[2])!==nimQ) continue;
+    var wv=rr[0]; var wd=(wv instanceof Date)?wv:new Date(wv);
+    var jam=isNaN(wd)?999:(now-wd)/3600000;
+    if(jam<24) count24++;
+    if(rr[5]===katQ){
+      if(jam<24 && normText(rr[7])===descQ && !hardDup) hardDup=rr;
+      if(String(rr[8]||"Baru")!=="Selesai" && !openDup) openDup=rr;
+    }
+  }
+  if(hardDup) return json({ok:false, error:"Aduan dengan isi yang sama sudah kamu kirim (ID "+(hardDup[10]||"-")+"). Cek statusnya di menu Hasil Laporan."});
+  if(count24>=5) return json({ok:false, error:"Batas 5 aduan per hari untuk Stambuk/NIP ini sudah tercapai. Silakan coba lagi besok."});
+  if(openDup && !b.konfirmasi){
+    var wo=openDup[0]; var wod=(wo instanceof Date)?wo:new Date(wo);
+    return json({ ok:false, warn:true, existing:{
+      kode:openDup[10]||"-", kategori:openDup[5], status:openDup[8]||"Baru",
+      deskripsi:String(openDup[7]||"").slice(0,140),
+      waktu: isNaN(wod)?String(wo):Utilities.formatDate(wod,"Asia/Makassar","dd MMM yyyy, HH:mm")
+    }});
+  }
+
   var kode=genTicket();
   var lampCell="";
   if(b.file && b.file.data){
@@ -322,6 +351,56 @@ function loginFail(u){
   props.setProperty("lf_"+u, JSON.stringify(o));
 }
 function loginReset(u){ PropertiesService.getScriptProperties().deleteProperty("lf_"+u); }
+
+/* ---- publik: lacak aduan berdasarkan Stambuk/NIP ---- */
+function handleCekNim(b){
+  if(b.token!==TOKEN) return json({ok:false,error:"Token tidak valid"});
+  var nim=normText(b.nim);
+  if(nim.length<3) return json({ok:false,error:"Masukkan Stambuk/NIP dengan benar"});
+  var ids=allSheetIds(), rows=[];
+  for(var n=0;n<ids.length;n++){
+    var ss; try{ ss=SpreadsheetApp.openById(ids[n]); }catch(e){ continue; }
+    var sheets=ss.getSheets();
+    for(var j=0;j<sheets.length;j++){
+      var sh=sheets[j]; if(sh.getName()===ADMIN_TAB) continue;
+      var d=sh.getDataRange().getValues(); if(!d.length||d[0][0]!=="Waktu") continue;
+      for(var i=1;i<d.length;i++){ var r=d[i]; if(!r[1]) continue;
+        if(normText(r[2])!==nim) continue;
+        rows.push({ kode:r[10]||"-", nama:maskName(r[1]), prodi:r[3], kategori:r[5],
+          prioritas:r[6], status:r[8]||"Baru", deskripsi:String(r[7]||""), catatan:r[9]||"", waktu:r[0] });
+      }
+    }
+  }
+  rows.sort(function(x,y){ return new Date(y.waktu)-new Date(x.waktu); });
+  return json({ok:true, rows:rows});
+}
+
+/* ---- publik: pelapor memperbarui deskripsi aduannya sendiri ---- */
+function handleEditPublik(b){
+  if(b.token!==TOKEN) return json({ok:false,error:"Token tidak valid"});
+  if(!isFormOpen()) return json({ok:false,error:"Form tutup. Jam layanan: Senin-Kamis 08.00-16.00, Jumat 08.00-16.30 (WITA)."});
+  var kode=String(b.kode||"").trim(), stambuk=normText(b.stambuk), desc=String(b.deskripsi||"").trim();
+  if(!kode || !stambuk) return json({ok:false,error:"Data tidak lengkap"});
+  if(desc.length<10) return json({ok:false,error:"Deskripsi terlalu pendek"});
+  if(desc.length>5000) return json({ok:false,error:"Deskripsi terlalu panjang (maks 5000 karakter)"});
+  var ids=allSheetIds();
+  for(var n=0;n<ids.length;n++){
+    var ss; try{ ss=SpreadsheetApp.openById(ids[n]); }catch(e){ continue; }
+    var sheets=ss.getSheets();
+    for(var j=0;j<sheets.length;j++){
+      var sh=sheets[j]; if(sh.getName()===ADMIN_TAB) continue;
+      var d=sh.getDataRange().getValues(); if(!d.length||d[0][0]!=="Waktu") continue;
+      for(var i=1;i<d.length;i++){
+        var r=d[i]; if(String(r[10]||"")!==kode) continue;
+        if(normText(r[2])!==stambuk) return json({ok:false,error:"Stambuk tidak cocok dengan aduan ini"});
+        if(String(r[8]||"Baru")==="Selesai") return json({ok:false,error:"Aduan sudah Selesai, tidak bisa diubah lagi"});
+        sh.getRange(i+1,8).setValue(safeCell(desc));
+        return json({ok:true, kode:kode});
+      }
+    }
+  }
+  return json({ok:false,error:"Aduan tidak ditemukan"});
+}
 
 /* ---- admin: login ---- */
 function handleLogin(b){

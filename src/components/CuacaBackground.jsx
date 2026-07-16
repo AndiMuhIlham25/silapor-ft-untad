@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 
 const KAMPUS = { lat: -0.8364, lon: 119.8937 }; // UNTAD, Tondo, Palu
 
+// cache lintas-halaman: hindari fetch ulang saat pindah menu (TTL 15 menit)
+let cache = { at: 0, scene: null, temp: null };
+
 // WMO weather code + is_day -> scene
 function mapScene(code, isDay) {
   if ([95, 96, 99].includes(code)) return "badai";
@@ -19,14 +22,16 @@ const CFG = {
 };
 
 export default function CuacaBackground({ onMood }) {
-  const [scene, setScene] = useState("cerah");
-  const [temp, setTemp] = useState(null);
+  const fresh = Date.now() - cache.at < 15 * 60 * 1000;
+  const [scene, setScene] = useState(fresh && cache.scene ? cache.scene : "cerah");
+  const [temp, setTemp] = useState(fresh ? cache.temp : null);
   const cvRef = useRef(null);
   const animRef = useRef(null);
 
   // ambil lokasi + cuaca
   useEffect(() => {
     let alive = true;
+    if (Date.now() - cache.at < 15 * 60 * 1000 && cache.scene) return; // pakai cache
     const fetchCuaca = async (lat, lon) => {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day`;
@@ -34,8 +39,10 @@ export default function CuacaBackground({ onMood }) {
         const d = await res.json();
         if (!alive || !d.current) return;
         const s = mapScene(d.current.weather_code, d.current.is_day === 1);
+        const t = Math.round(d.current.temperature_2m);
+        cache = { at: Date.now(), scene: s, temp: t };
         setScene(s);
-        setTemp(Math.round(d.current.temperature_2m));
+        setTemp(t);
       } catch { /* diamkan: tetap pakai scene default */ }
     };
     const go = (lat, lon) => fetchCuaca(lat, lon);

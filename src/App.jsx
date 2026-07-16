@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { apiSubmit } from "./api.js";
+import { apiSubmit, apiEditPublik } from "./api.js";
 import Header from "./components/Header.jsx";
 import Hero from "./components/Hero.jsx";
 import Layanan from "./components/Layanan.jsx";
@@ -7,6 +7,7 @@ import FormAduan from "./components/FormAduan.jsx";
 import LaporanPublik from "./components/LaporanPublik.jsx";
 import Toast from "./components/Toast.jsx";
 import Chatbot from "./components/Chatbot.jsx";
+import CuacaBand from "./components/CuacaBand.jsx";
 import { statusJamLayanan, JADWAL_TEKS } from "./utils/jam.js";
 
 const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "", file: null };
@@ -18,6 +19,7 @@ export default function App() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const formT0 = React.useRef(Date.now());
+  const [dupWarn, setDupWarn] = useState(null);
 
   useEffect(() => {
     const on = () => setHash(window.location.hash);
@@ -76,21 +78,61 @@ export default function App() {
       file: form.file,
     };
 
-    setSending(true);
-    const result = await apiSubmit(payload);
-    setSending(false);
-    setForm(EMPTY_FORM);
-    setErrors({});
-    formT0.current = Date.now();
+    await kirim(payload, false);
+  };
 
-    if (result.ok) fireToast("Aduan terkirim · ID " + (result.ticket || "-") + " — simpan untuk lacak status");
-    else fireToast("Gagal kirim ke spreadsheet — cek koneksi/URL");
+  // perbarui deskripsi aduan lama (dipakai dari modal duplikat)
+  const perbarui = async () => {
+    if (!dupWarn) return;
+    setSending(true);
+    const res = await apiEditPublik({
+      kode: dupWarn.existing.kode,
+      stambuk: dupWarn.payload.identitas,
+      deskripsi: dupWarn.payload.deskripsi,
+    });
+    setSending(false);
+    if (res.ok) {
+      setForm(EMPTY_FORM); setErrors({}); formT0.current = Date.now();
+      setDupWarn(null);
+      fireToast("Aduan " + res.kode + " berhasil diperbarui");
+    } else {
+      fireToast(res.error || "Gagal memperbarui aduan");
+    }
+  };
+
+  // kirim ke server; tangani peringatan duplikat (warn) & error dari server
+  const kirim = async (payload, konfirmasi) => {
+    setSending(true);
+    const result = await apiSubmit({ ...payload, konfirmasi: !!konfirmasi });
+    setSending(false);
+
+    if (result.warn && result.existing) {
+      setDupWarn({ existing: result.existing, payload }); // tampilkan konfirmasi
+      return;
+    }
+
+    if (result.ok) {
+      setForm(EMPTY_FORM); setErrors({}); formT0.current = Date.now();
+      setDupWarn(null);
+      fireToast("Aduan terkirim · ID " + (result.ticket || "-") + " — simpan untuk lacak status");
+    } else {
+      setDupWarn(null);
+      fireToast(result.error || "Gagal kirim — cek koneksi/URL");
+    }
   };
 
   return (
     <>
       <Header view={view} nav={nav} onLoginAdmin={loginAdmin} />
       {view === "beranda" && <Hero onBuat={goBuat} onLayanan={() => nav("layanan")} />}
+      {view === "layanan" && (
+        <CuacaBand eyebrow="Layanan" title="Kategori kendala yang bisa dilaporkan"
+          sub="Pilih kategori — form aduan akan otomatis terisi." />
+      )}
+      {view === "laporan" && (
+        <CuacaBand eyebrow="Lacak Aduan" title="Hasil Laporan Aduan"
+          sub="Masukkan Stambuk/NIP kamu untuk melihat ID aduan, status penanganan, dan catatan dari admin." />
+      )}
       <div className="wrap">
         {view === "layanan" ? (
           <div className="layanan-page"><Layanan onPick={pickLayanan} /></div>
@@ -103,6 +145,35 @@ export default function App() {
           SILAPOR FT UNTAD — Sistem Pengaduan Layanan Akademik · Fakultas Teknik, Universitas Tadulako
         </footer>
       </div>
+      {dupWarn && (
+        <div className="ov" onClick={() => setDupWarn(null)}>
+          <div className="note-modal dup-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="note-modal-h">
+              <div><b>Sepertinya kamu sudah pernah melapor</b></div>
+              <button className="x" onClick={() => setDupWarn(null)}>×</button>
+            </div>
+            <div className="note-modal-b">
+              <p className="dup-lead">Kamu punya aduan yang <b>masih ditangani</b> dengan kategori yang sama:</p>
+              <div className="dup-card">
+                <div className="dup-id">{dupWarn.existing.kode}</div>
+                <div className="dup-meta">
+                  <span className="tag2 tag-kat">{dupWarn.existing.kategori}</span>
+                  <span className="tag2 dup-st">{dupWarn.existing.status}</span>
+                  <span className="muted td-s">{dupWarn.existing.waktu}</span>
+                </div>
+                {dupWarn.existing.deskripsi && <div className="dup-desc">“{dupWarn.existing.deskripsi}…”</div>}
+              </div>
+              <p className="dup-ask">Kalau ini <b>masalah yang sama</b> dan kamu cuma ingin memperjelas, tekan <b>Perbarui</b> — deskripsi yang baru kamu tulis akan menggantikan yang lama (tanpa bikin aduan baru).</p>
+              <div className="note-actions dup-actions">
+                <button className="btn-g" onClick={() => kirim(dupWarn.payload, true)} disabled={sending}>Beda masalah — kirim baru</button>
+                <button className="btn-p" onClick={perbarui} disabled={sending}>
+                  {sending ? "Menyimpan…" : "✏️ Perbarui aduan ini"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <Toast message={toast} />
       <Chatbot />
     </>

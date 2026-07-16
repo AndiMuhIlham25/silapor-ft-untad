@@ -185,7 +185,7 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
         <ArsipUnduh token={token} />
 
         <div className="controls">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nama, NIM, prodi, atau isi aduan…" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari nama, stambuk, prodi, atau isi aduan…" />
           <select value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
             <option>Semua</option><option>Baru</option><option>Diproses</option><option>Selesai</option>
           </select>

@@ -56,7 +56,7 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
             {errors.nama && <div className="err-msg">Nama wajib diisi.</div>}
           </div>
           <div className="field">
-            <label>NIM / NIP / NIDN</label>
+            <label>Stambuk / NIP / NIDN</label>
             <input className={errors.identitas ? "err" : ""} value={form.identitas} onChange={set("identitas")} placeholder="Nomor identitas" />
             {errors.identitas && <div className="err-msg">Nomor identitas wajib diisi.</div>}
           </div>

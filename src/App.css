@@ -439,3 +439,43 @@ body { overflow-x: hidden; }
 
 /* fix: canvas cuaca harus penuh (elemen canvas tak melar dengan inset:0 saja) */
 .cu-canvas { width: 100% !important; height: 100% !important; display: block; }
+
+/* ===== Modal peringatan duplikat ===== */
+.dup-modal { max-width: 480px; }
+.dup-lead { font-size: 13.5px; color: #475569; margin-bottom: 12px; }
+.dup-card { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 13px 14px; }
+.dup-id { font-family: ui-monospace, "SF Mono", monospace; font-size: 14px; font-weight: 800; color: #c2410c; margin-bottom: 8px; }
+.dup-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dup-st { color: #b45309; background: #fef3c7; }
+.dup-desc { margin-top: 10px; font-size: 12.5px; color: #7c2d12; font-style: italic; line-height: 1.5; }
+.dup-ask { font-size: 13px; color: #475569; margin: 14px 0 4px; line-height: 1.55; }
+
+/* ===== Lacak aduan (Hasil Laporan sederhana) ===== */
+.lacak-box { display: flex; gap: 10px; max-width: 620px; margin: 0 auto 6px; }
+.lacak-box input { flex: 1; border: 1px solid #d7dfea; border-radius: 12px; padding: 13px 16px; font-size: 14px; background: #fff; }
+.lacak-box input:focus { outline: none; border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29,78,216,.12); }
+.lacak-box .btn-p { padding: 13px 22px; white-space: nowrap; }
+.lacak-err { max-width: 620px; margin: 10px auto 0; font-size: 13px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 9px 14px; border-radius: 10px; }
+.lacak-empty { max-width: 620px; margin: 18px auto 0; font-size: 13.5px; color: #475569; background: #f8fafc; border: 1px solid #e6edf5; padding: 16px; border-radius: 12px; text-align: center; }
+.lacak-list { max-width: 720px; margin: 22px auto 0; display: flex; flex-direction: column; gap: 12px; }
+.lacak-count { font-size: 13px; color: #64748b; }
+.lacak-item { background: #fff; border: 1px solid #e6ebf2; border-radius: 14px; padding: 15px 17px; box-shadow: 0 4px 14px rgba(15,23,42,.04); }
+.lacak-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+.lacak-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lacak-note { margin-top: 11px; max-width: none; }
+.lacak-nonote { margin-top: 11px; font-style: italic; }
+.lacak-dash { margin-top: 34px; }
+@media (max-width: 560px){ .lacak-box { flex-direction: column; } }
+
+/* band cuaca untuk halaman Layanan & Hasil Laporan */
+.band-cuaca { min-height: 40vh !important; }
+.band-cuaca .hero-content { padding: 30px 24px 36px; }
+.band-cuaca h1 { font-size: clamp(28px, 4vw, 44px) !important; }
+.band-cuaca p { font-size: 14px; }
+.band-cuaca .cu-sun { top: 14%; left: 12%; width: 62px; height: 62px; }
+.band-cuaca .cu-moon { top: 16%; right: 14%; width: 46px; height: 46px; }
+
+/* deskripsi masalah di hasil lacak */
+.lacak-desc { margin-top: 10px; font-size: 13px; color: #334155; line-height: 1.55; background: #f8fafc; border: 1px solid #eef2f7; border-radius: 10px; padding: 10px 12px; }
+.lacak-list .pager { margin-top: 6px; }
+.dup-actions { flex-wrap: wrap; }
