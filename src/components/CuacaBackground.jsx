@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const PALU = { lat: -0.8917, lon: 119.8707 };
+const KAMPUS = { lat: -0.8364, lon: 119.8937 }; // UNTAD, Tondo, Palu
 
 // WMO weather code + is_day -> scene
 function mapScene(code, isDay) {
@@ -42,19 +42,19 @@ export default function CuacaBackground({ onMood }) {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => go(pos.coords.latitude, pos.coords.longitude),
-        () => go(PALU.lat, PALU.lon), // izin ditolak / gagal -> Palu
+        () => go(KAMPUS.lat, KAMPUS.lon), // izin ditolak / gagal -> Palu
         { timeout: 8000, maximumAge: 600000 }
       );
     } else {
-      go(PALU.lat, PALU.lon);
+      go(KAMPUS.lat, KAMPUS.lon);
     }
     const iv = setInterval(() => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => fetchCuaca(pos.coords.latitude, pos.coords.longitude),
-          () => fetchCuaca(PALU.lat, PALU.lon)
+          () => fetchCuaca(KAMPUS.lat, KAMPUS.lon)
         );
-      } else fetchCuaca(PALU.lat, PALU.lon);
+      } else fetchCuaca(KAMPUS.lat, KAMPUS.lon);
     }, 15 * 60 * 1000); // refresh 15 menit
     return () => { alive = false; clearInterval(iv); };
   }, []);

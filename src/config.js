@@ -7,5 +7,5 @@
    login admin, monitoring). Kalau kosong, semua aksi akan gagal.
    ========================================================================= */
 
-export const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzdVf0OTh_-gG5zzT-y7Ubf8zEQ-khnv8jDyHuFjb-IPexNAbKRATOl_B_1bw3-d9w/exec";
+export const APPS_SCRIPT_URL = ""; // contoh: "https://script.google.com/macros/s/AKfy.../exec"
 export const TOKEN = "silapor-ft-2026"; // ganti dengan token rahasiamu (samakan di Code.gs)
