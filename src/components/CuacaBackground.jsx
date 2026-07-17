@@ -5,12 +5,19 @@ const KAMPUS = { lat: -0.8364, lon: 119.8937 }; // UNTAD, Tondo, Palu
 // cache lintas-halaman: hindari fetch ulang saat pindah menu (TTL 15 menit)
 let cache = { at: 0, scene: null, temp: null };
 
-// WMO weather code + is_day -> scene
-function mapScene(code, isDay) {
-  if ([95, 96, 99].includes(code)) return "badai";
-  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86].includes(code)) return "hujan";
-  if ([2, 3, 45, 48].includes(code)) return isDay ? "berawan" : "malam";
-  return isDay ? "cerah" : "malam"; // 0,1 clear
+// Tentukan scene dari CURAH HUJAN NYATA (mm), bukan sekadar weather_code.
+// Alasan: kode 51 (gerimis 0,1mm) & 65 (hujan deras) sama-sama "rain",
+// padahal 0,1mm praktis tak terasa. Palu juga lembah kering -> model global
+// sering melebihkan hujan. Ambang: >=0,5mm baru dianggap hujan.
+function mapScene(code, isDay, precip, cloud) {
+  const p = Number(precip) || 0;
+  const c = Number(cloud) || 0;
+  const petir = [95, 96, 99].includes(code);
+  if (petir && p >= 2) return "badai";   // petir + hujan deras
+  if (p >= 0.5) return "hujan";          // hujan yang benar-benar terasa
+  if (!isDay) return "malam";
+  if (c >= 65) return "berawan";         // mendung tebal
+  return "cerah";
 }
 
 const CFG = {
@@ -34,11 +41,11 @@ export default function CuacaBackground({ onMood }) {
     if (Date.now() - cache.at < 15 * 60 * 1000 && cache.scene) return; // pakai cache
     const fetchCuaca = async (lat, lon) => {
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day,precipitation,cloud_cover`;
         const res = await fetch(url);
         const d = await res.json();
         if (!alive || !d.current) return;
-        const s = mapScene(d.current.weather_code, d.current.is_day === 1);
+        const s = mapScene(d.current.weather_code, d.current.is_day === 1, d.current.precipitation, d.current.cloud_cover);
         const t = Math.round(d.current.temperature_2m);
         cache = { at: Date.now(), scene: s, temp: t };
         setScene(s);
