@@ -57,7 +57,7 @@ export default function LaporanPublik() {
 
   const lacak = async () => {
     const q = stambuk.trim();
-    if (q.length < 3) { setErr("Masukkan Stambuk/NIP dengan benar."); return; }
+    if (q.length < 3) { setErr("Masukkan Stambuk/NIP atau ID Aduan dengan benar."); return; }
     setErr(""); setCari(true); setHasil(null);
     const res = await apiCekNim(q);
     setCari(false);
@@ -77,7 +77,7 @@ export default function LaporanPublik() {
           value={stambuk}
           onChange={(e) => setStambuk(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && lacak()}
-          placeholder="Ketik Stambuk / NIP kamu, contoh: F12122088"
+          placeholder="Ketik Stambuk/NIP atau ID Aduan — mis. F12122088 atau ADU-260717-4231"
         />
         <button className="btn-p" onClick={lacak} disabled={cari}>{cari ? "Mencari…" : "Lacak Aduan"}</button>
       </div>
@@ -86,7 +86,7 @@ export default function LaporanPublik() {
       {hasil && (
         hasil.length === 0 ? (
           <div className="lacak-empty">
-            Tidak ada aduan atas Stambuk/NIP <b>{stambuk.trim()}</b>. Pastikan penulisannya sama persis seperti saat mengirim aduan.
+            Tidak ditemukan aduan untuk <b>{stambuk.trim()}</b>. Pastikan Stambuk/NIP atau ID Aduan ditulis sama persis.
           </div>
         ) : (
           <div className="lacak-list">

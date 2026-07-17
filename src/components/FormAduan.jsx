@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { KATEGORI, ROLES, PRIORITAS, PRODI } from "../data/seed.js";
-import { statusJamLayanan, JADWAL_TEKS } from "../utils/jam.js";
 import { fileToBase64 } from "../utils/file.js";
 
 export default function FormAduan({ form, setForm, errors, onSubmit, sending }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const [jam, setJam] = useState(statusJamLayanan());
   const [fileErr, setFileErr] = useState("");
-  useEffect(() => {
-    const t = setInterval(() => setJam(statusJamLayanan()), 30000); // cek tiap 30 dtk agar terkunci otomatis
-    return () => clearInterval(t);
-  }, []);
-  const tutup = !jam.open;
 
   const onFile = async (e) => {
     setFileErr("");
@@ -31,19 +24,8 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
         <p>Jelaskan kendala sedetail mungkin agar cepat ditindaklanjuti ke admin yang tepat.</p>
       </div>
 
-      <div className={"form-card" + (tutup ? " form-locked" : "")}>
+      <div className="form-card">
 
-      {tutup ? (
-        <div className="jam-lock">
-          <span className="jam-lock-ic">🔒</span>
-          <div>
-            <b>Form aduan sedang tutup</b>
-            <div>Pengaduan hanya dapat dikirim pada jam layanan: <b>{JADWAL_TEKS}</b> (WITA).</div>
-          </div>
-        </div>
-      ) : (
-        <div className="jam-open">🟢 Layanan buka · {jam.jamHari} WITA</div>
-      )}
 
       {/* honeypot anti-spam: tak terlihat manusia, sering diisi bot */}
       <div className="hp-field" aria-hidden="true">
@@ -117,13 +99,13 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
               <button type="button" onClick={() => setForm((s) => ({ ...s, file: null }))}>Hapus</button>
             </div>
           ) : (
-            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={onFile} disabled={tutup} />
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={onFile} />
           )}
           {fileErr && <div className="err-msg">{fileErr}</div>}
         </div>
 
-        <button className="submit" onClick={onSubmit} disabled={sending || tutup}>
-          {tutup ? "Form Tutup — Di Luar Jam Layanan" : sending ? "Mengirim…" : "Kirim Aduan"}
+        <button className="submit" onClick={onSubmit} disabled={sending}>
+          {sending ? "Mengirim…" : "Kirim Aduan"}
         </button>
       </div>
     </section>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import logoUntad from "../assets/logo-untad.png";
 import ArsipUnduh from "./ArsipUnduh.jsx";
 import { apiList, apiUpdateStatus, apiNote, apiLogList, apiLampiran } from "../api.js";
@@ -40,13 +40,54 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
   };
   useEffect(() => { if (isSuper) muatLog(); /* eslint-disable-next-line */ }, []);
 
+  // ---- deteksi aduan baru masuk ----
+  const seenRef = useRef(null);
+  const [newCount, setNewCount] = useState(0);
+  const [newKodes, setNewKodes] = useState(() => new Set());
+
+  const beep = () => {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      const ctx = new AC(), o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = "sine"; o.frequency.value = 880;
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+      o.start(); o.stop(ctx.currentTime + 0.36);
+      setTimeout(() => ctx.close(), 600);
+    } catch { /* diabaikan */ }
+  };
+
   const load = async (silent) => {
     if (!silent) setLoading(true);
     const res = await apiList(token);
-    setRows(res.ok ? res.rows : []);
+    const data = res.ok ? res.rows : [];
+    if (res.ok) {
+      const kodes = new Set(data.map((r) => r.kode));
+      if (seenRef.current === null) {
+        seenRef.current = kodes; // muatan pertama = patokan, jangan notif
+      } else {
+        const fresh = data.filter((r) => !seenRef.current.has(r.kode));
+        if (fresh.length) {
+          setNewCount((c) => c + fresh.length);
+          setNewKodes((prev) => { const n = new Set(prev); fresh.forEach((r) => n.add(r.kode)); return n; });
+          beep();
+        }
+        seenRef.current = kodes;
+      }
+    }
+    setRows(data);
     if (res.sheetLinks) setLinks(res.sheetLinks);
     if (!silent) setLoading(false);
   };
+
+  // judul tab browser ikut menandai aduan baru
+  useEffect(() => {
+    document.title = newCount > 0 ? `(${newCount}) Aduan baru · SILAPOR` : "SILAPOR FT UNTAD — Panel Admin";
+  }, [newCount]);
+
+  const lihatBaru = () => { setFStatus("Baru"); setQ(""); setNewCount(0); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
   // auto-refresh tiap 5 detik (tanpa kedip)
   useEffect(() => {
@@ -147,6 +188,13 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
       </header>
 
       <div className="admin-wrap">
+        {newCount > 0 && (
+          <button className="new-alert" onClick={lihatBaru}>
+            <span className="new-dot" />
+            <b>{newCount} aduan baru masuk</b>
+            <span className="new-cta">Lihat →</span>
+          </button>
+        )}
         <div className="dash">
           <div className="card">
             <h3>Distribusi Status</h3>
@@ -205,8 +253,11 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
                 const sm = statusMeta(r.status), pm = prioMeta(r.prioritas);
                 const bid = idOf(r);
                 return (
-                  <tr key={i}>
-                    <td className="td-kode">{r.kode}</td>
+                  <tr key={i} className={newKodes.has(r.kode) ? "row-new" : ""}>
+                    <td className="td-kode">
+                      {newKodes.has(r.kode) && <span className="badge-new">BARU</span>}
+                      {r.kode}
+                    </td>
                     <td className="muted td-s nowrap">{fmtWaktu(r.waktu)}</td>
                     <td>
                       <b className="td-b">{r.nama}</b>

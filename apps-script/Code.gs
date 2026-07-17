@@ -77,6 +77,14 @@ function genTicket(){
   var ymd = Utilities.formatDate(new Date(), "Asia/Makassar", "yyMMdd");
   return "ADU-" + ymd + "-" + Math.floor(1000 + Math.random()*9000);
 }
+function jamInfo(){
+  var d=new Date();
+  var day=Number(Utilities.formatDate(d,"Asia/Makassar","u"));   // 1=Sen .. 7=Min
+  var mins=Number(Utilities.formatDate(d,"Asia/Makassar","HH"))*60+Number(Utilities.formatDate(d,"Asia/Makassar","mm"));
+  if(day>=6) return { luarJam:true, akhirPekan:true };            // Sabtu-Minggu
+  var buka = (day<=4) ? (mins>=480 && mins<960) : (mins>=480 && mins<990); // Sen-Kam 08-16, Jum 08-16.30
+  return { luarJam: !buka, akhirPekan:false };
+}
 function isFormOpen(){
   var d=new Date();
   var day=Number(Utilities.formatDate(d,"Asia/Makassar","u")); // 1=Sen..7=Min
@@ -250,7 +258,6 @@ function diag(){
 function handleSubmit(b){
   if(b.token!==TOKEN) return json({ok:false,error:"Token tidak valid"});
   if(b.hp && String(b.hp).trim()!=="") return json({ok:true, ticket:"-"}); // honeypot: bot terdeteksi, buang diam-diam
-  if(!isFormOpen()) return json({ok:false, error:"Form aduan tutup. Jam layanan: Senin-Kamis 08.00-16.00, Jumat 08.00-16.30 (WITA)."});
   var req=["nama","identitas","prodi","kategori","deskripsi"];
   for(var i=0;i<req.length;i++){ var f=req[i]; if(!b[f]||String(b[f]).trim()==="") return json({ok:false,error:"Field wajib kosong: "+f}); }
   if(String(b.deskripsi).trim().length<10) return json({ok:false,error:"Deskripsi terlalu pendek"});
@@ -309,7 +316,8 @@ function handleSubmit(b){
     lampCell=fname+LAMP_SEP+file.getId();
   }
   sh.appendRow([ new Date(), safeCell(b.nama), safeCell(b.identitas), b.prodi, b.role||"-", b.kategori, b.prioritas||"-", safeCell(b.deskripsi), "Baru", "", kode, lampCell ]);
-  return json({ ok:true, area:area, tab:tab, ticket:kode });
+  var ji=jamInfo();
+  return json({ ok:true, area:area, tab:tab, ticket:kode, luarJam:ji.luarJam, akhirPekan:ji.akhirPekan });
 }
 
 /* ---- publik: monitoring (identitas disamarkan) ---- */
@@ -352,11 +360,11 @@ function loginFail(u){
 }
 function loginReset(u){ PropertiesService.getScriptProperties().deleteProperty("lf_"+u); }
 
-/* ---- publik: lacak aduan berdasarkan Stambuk/NIP ---- */
+/* ---- publik: lacak aduan via Stambuk/NIP atau ID Aduan ---- */
 function handleCekNim(b){
   if(b.token!==TOKEN) return json({ok:false,error:"Token tidak valid"});
-  var nim=normText(b.nim);
-  if(nim.length<3) return json({ok:false,error:"Masukkan Stambuk/NIP dengan benar"});
+  var q=normText(b.nim); // boleh Stambuk/NIP atau ID Aduan
+  if(q.length<3) return json({ok:false,error:"Masukkan Stambuk/NIP atau ID Aduan dengan benar"});
   var ids=allSheetIds(), rows=[];
   for(var n=0;n<ids.length;n++){
     var ss; try{ ss=SpreadsheetApp.openById(ids[n]); }catch(e){ continue; }
@@ -365,7 +373,7 @@ function handleCekNim(b){
       var sh=sheets[j]; if(sh.getName()===ADMIN_TAB) continue;
       var d=sh.getDataRange().getValues(); if(!d.length||d[0][0]!=="Waktu") continue;
       for(var i=1;i<d.length;i++){ var r=d[i]; if(!r[1]) continue;
-        if(normText(r[2])!==nim) continue;
+        if(normText(r[2])!==q && normText(r[10])!==q) continue;
         rows.push({ kode:r[10]||"-", nama:maskName(r[1]), prodi:r[3], kategori:r[5],
           prioritas:r[6], status:r[8]||"Baru", deskripsi:String(r[7]||""), catatan:r[9]||"", waktu:r[0] });
       }
@@ -378,7 +386,6 @@ function handleCekNim(b){
 /* ---- publik: pelapor memperbarui deskripsi aduannya sendiri ---- */
 function handleEditPublik(b){
   if(b.token!==TOKEN) return json({ok:false,error:"Token tidak valid"});
-  if(!isFormOpen()) return json({ok:false,error:"Form tutup. Jam layanan: Senin-Kamis 08.00-16.00, Jumat 08.00-16.30 (WITA)."});
   var kode=String(b.kode||"").trim(), stambuk=normText(b.stambuk), desc=String(b.deskripsi||"").trim();
   if(!kode || !stambuk) return json({ok:false,error:"Data tidak lengkap"});
   if(desc.length<10) return json({ok:false,error:"Deskripsi terlalu pendek"});

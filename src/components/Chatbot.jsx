@@ -12,7 +12,7 @@ const FAQ = [
   { key: "jam", kw: ["jam", "buka", "tutup", "kapan", "waktu layanan", "jadwal layanan", "hari kerja", "jam berapa"],
     a: "Jam layanan pengaduan (WITA):\n• Senin–Kamis: 08.00–16.00\n• Jumat: 08.00–16.30\n• Sabtu–Minggu: tutup\nDi luar jam itu, form aduan otomatis terkunci." },
   { key: "status", kw: ["status", "cek", "lacak", "pantau", "id aduan", "stambuk", "sudah diproses", "progres", "tindak lanjut", "sampai mana"],
-    a: "Untuk cek status: buka menu Hasil Laporan, lalu masukkan Stambuk/NIP kamu — semua aduanmu beserta ID dan statusnya akan muncul. Statusnya update langsung (Baru → Diproses → Selesai)." },
+    a: "Untuk cek status: buka menu Hasil Laporan, lalu masukkan Stambuk/NIP kamu (muncul semua aduanmu) atau langsung ketik ID Aduan-nya (mis. ADU-260717-4231) untuk melihat satu aduan saja. Statusnya update langsung (Baru → Diproses → Selesai)." },
   { key: "kategori", kw: ["kategori", "jenis aduan", "masalah apa", "keluhan apa", "pilihan aduan"],
     a: "Kategori aduan: SIGA-8, Nilai, Jadwal & KRS, Akses Akun, Data Mahasiswa, Persuratan, dan Lainnya. Pilihan kategori otomatis menyesuaikan Peran kamu (Mahasiswa / Dosen / Operator Prodi/Jurusan)." },
   { key: "lampiran", kw: ["lampiran", "upload", "unggah", "berkas", "dokumen", "pdf", "foto bukti", "attach"],

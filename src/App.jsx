@@ -8,7 +8,6 @@ import LaporanPublik from "./components/LaporanPublik.jsx";
 import Toast from "./components/Toast.jsx";
 import Chatbot from "./components/Chatbot.jsx";
 import CuacaBand from "./components/CuacaBand.jsx";
-import { statusJamLayanan, JADWAL_TEKS } from "./utils/jam.js";
 
 const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "", file: null };
 
@@ -20,6 +19,7 @@ export default function App() {
   const [errors, setErrors] = useState({});
   const formT0 = React.useRef(Date.now());
   const [dupWarn, setDupWarn] = useState(null);
+  const [sukses, setSukses] = useState(null);
 
   useEffect(() => {
     const on = () => setHash(window.location.hash);
@@ -53,10 +53,6 @@ export default function App() {
   };
 
   const submit = async () => {
-    if (!statusJamLayanan().open) {
-      fireToast("Form tutup — jam layanan: " + JADWAL_TEKS);
-      return;
-    }
     // anti-spam: honeypot terisi atau form diisi <1.2 dtk (indikasi bot)
     if (form.hp.trim() !== "" || Date.now() - formT0.current < 1200) {
       setForm(EMPTY_FORM); setErrors({}); formT0.current = Date.now();
@@ -114,7 +110,8 @@ export default function App() {
     if (result.ok) {
       setForm(EMPTY_FORM); setErrors({}); formT0.current = Date.now();
       setDupWarn(null);
-      fireToast("Aduan terkirim · ID " + (result.ticket || "-") + " — simpan untuk lacak status");
+      if (result.luarJam) setSukses({ ticket: result.ticket, akhirPekan: !!result.akhirPekan, stambuk: payload.identitas });
+      else fireToast("Aduan terkirim · ID " + (result.ticket || "-") + " — simpan untuk lacak status");
     } else {
       setDupWarn(null);
       fireToast(result.error || "Gagal kirim — cek koneksi/URL");
@@ -131,7 +128,7 @@ export default function App() {
       )}
       {view === "laporan" && (
         <CuacaBand eyebrow="Lacak Aduan" title="Hasil Laporan Aduan"
-          sub="Masukkan Stambuk/NIP kamu untuk melihat ID aduan, status penanganan, dan catatan dari admin." />
+          sub="Masukkan Stambuk/NIP atau ID Aduan untuk melihat status penanganan dan catatan dari admin." />
       )}
       <div className="wrap">
         {view === "layanan" ? (
@@ -145,6 +142,37 @@ export default function App() {
           SILAPOR FT UNTAD — Sistem Pengaduan Layanan Akademik · Fakultas Teknik, Universitas Tadulako
         </footer>
       </div>
+      {sukses && (
+        <div className="ov" onClick={() => setSukses(null)}>
+          <div className="ok-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ok-top">
+              <div className={"ok-ic " + (sukses.akhirPekan ? "ok-ic-pekan" : "ok-ic-jam")}>
+                {sukses.akhirPekan ? "📅" : "📝"}
+              </div>
+              <b>Aduan kamu sudah direkam</b>
+              <p>
+                {sukses.akhirPekan
+                  ? "Aduan akan diproses sesuai dengan hari kerja. Karena masuk di akhir pekan, aduan akan ditindaklanjuti mulai hari Senin pukul 08.00 WITA. "
+                  : "Aduan akan diproses sesuai dengan hari kerja (Senin–Jumat, mulai pukul 08.00 WITA). "}
+                Simpan ID di bawah untuk memantau statusnya atau ketik Stambuk/NIP Anda untuk melihat apa saja yang telah Anda lapor.
+              </p>
+              <div className="ok-ids">
+                <div className="ok-id">
+                  <small>Stambuk / NIP</small>
+                  <div>{sukses.stambuk || "-"}</div>
+                </div>
+                <div className="ok-id">
+                  <small>ID Aduan</small>
+                  <div>{sukses.ticket || "-"}</div>
+                </div>
+              </div>
+              <p className="ok-sub">Aduan tetap diteruskan ke admin prodi terkait. Pantau statusnya di menu <b>Hasil Laporan</b>.</p>
+            </div>
+            <div className="ok-foot"><button onClick={() => setSukses(null)}>Mengerti</button></div>
+          </div>
+        </div>
+      )}
+
       {dupWarn && (
         <div className="ov" onClick={() => setDupWarn(null)}>
           <div className="note-modal dup-modal" onClick={(e) => e.stopPropagation()}>
