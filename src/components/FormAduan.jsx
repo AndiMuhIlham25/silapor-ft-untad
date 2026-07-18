@@ -34,7 +34,7 @@ export default function FormAduan({ form, setForm, errors, onSubmit, sending }) 
         <div className="frow">
           <div className="field">
             <label>Nama Lengkap</label>
-            <input className={errors.nama ? "err" : ""} value={form.nama} onChange={set("nama")} placeholder="Nama kamu" />
+            <input className={errors.nama ? "err" : ""} value={form.nama} onChange={set("nama")} placeholder="Nama Anda" />
             {errors.nama && <div className="err-msg">Nama wajib diisi.</div>}
           </div>
           <div className="field">
