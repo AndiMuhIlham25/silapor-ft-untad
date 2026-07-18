@@ -46,7 +46,7 @@ export default function App() {
   const suksesInfo = (s) => {
     if (!s.luarJam) return {
       ic: "✅", cls: "ok-ic-kerja", judul: "Aduan berhasil terkirim",
-      body: "Aduan sudah diteruskan ke admin prodi terkait dan akan segera ditindaklanjuti. " + LACAK_TEKS,
+      body: "Aduan sudah diteruskan ke admin terkait dan akan segera ditindaklanjuti. " + LACAK_TEKS,
       sub: <>Pantau statusnya di menu <b>Hasil Laporan</b>.</>,
     };
     if (s.akhirPekan) return {
