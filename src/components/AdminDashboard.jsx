@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import logoUntad from "../assets/logo-untad.png";
 import ArsipUnduh from "./ArsipUnduh.jsx";
-import { apiList, apiUpdateStatus, apiNote, apiLogList, apiLampiran } from "../api.js";
-import { KATEGORI } from "../data/seed.js";
+import { apiList, apiUpdateStatus, apiLogList, apiLampiran } from "../api.js";
+import { KATEGORI, BALASAN_CEPAT } from "../data/seed.js";
 import { statusMeta, prioMeta } from "../utils/meta.js";
 import { bukaBase64 } from "../utils/file.js";
 import Donut from "./Donut.jsx";
@@ -14,11 +14,11 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [fStatus, setFStatus] = useState("Semua");
-  const [busyId, setBusyId] = useState(null);
 
-  const [noteItem, setNoteItem] = useState(null);
-  const [noteText, setNoteText] = useState("");
-  const [savingNote, setSavingNote] = useState(false);
+  const [stItem, setStItem] = useState(null);   // { item, target }
+  const [stText, setStText] = useState("");
+  const [stSaving, setStSaving] = useState(false);
+  const [stErr, setStErr] = useState("");
 
   const [lampBusy, setLampBusy] = useState(null);
   const lihatLampiran = async (r) => {
@@ -141,22 +141,19 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
 
   const idOf = (r) => r.ssId + r.sheet + r.row;
 
-  const changeStatus = async (item, status) => {
-    setBusyId(idOf(item));
-    const res = await apiUpdateStatus(token, item, status);
-    setBusyId(null);
-    if (res.ok) setRows((prev) => prev.map((r) => (r === item ? { ...r, status } : r)));
-  };
-
-  const openNote = (item) => { setNoteItem(item); setNoteText(item.catatan || ""); };
-  const saveNote = async () => {
-    setSavingNote(true);
-    const res = await apiNote(token, noteItem, noteText.trim());
-    setSavingNote(false);
+  // buka modal ubah status (catatan wajib)
+  const openStatus = (item, target) => { setStItem({ item, target }); setStText(""); setStErr(""); };
+  const simpanStatus = async () => {
+    const teks = stText.trim();
+    if (teks.length < 5) { setStErr("Catatan wajib diisi (minimal 5 karakter)."); return; }
+    const { item, target } = stItem;
+    setStSaving(true);
+    const res = await apiUpdateStatus(token, item, target, teks);
+    setStSaving(false);
     if (res.ok) {
-      setRows((prev) => prev.map((r) => (r === noteItem ? { ...r, catatan: noteText.trim() } : r)));
-      setNoteItem(null);
-    }
+      setRows((prev) => prev.map((r) => (r === item ? { ...r, status: target, catatan: teks } : r)));
+      setStItem(null);
+    } else setStErr(res.error || "Gagal menyimpan.");
   };
 
   const fmtWaktu = (w) => {
@@ -251,7 +248,6 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
                 <tr><td colSpan={7} className="emptyrow">Belum ada aduan di area Anda.</td></tr>
               ) : paged.map((r, i) => {
                 const sm = statusMeta(r.status), pm = prioMeta(r.prioritas);
-                const bid = idOf(r);
                 return (
                   <tr key={i} className={newKodes.has(r.kode) ? "row-new" : ""}>
                     <td className="td-kode">
@@ -276,9 +272,9 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
                     <td><span className="tag2" style={{ color: pm.c, background: pm.bg }}>{r.prioritas}</span></td>
                     <td><span className="tag2" style={{ color: sm.c, background: sm.bg }}>{r.status}</span></td>
                     <td className="ta-r nowrap">
-                      {r.status === "Baru" && <button className="act" disabled={busyId === bid} onClick={() => changeStatus(r, "Diproses")}>Proses</button>}
-                      {r.status !== "Selesai" && <button className="act" disabled={busyId === bid} onClick={() => changeStatus(r, "Selesai")}>Selesai</button>}
-                      <button className="act" onClick={() => openNote(r)}>Catatan</button>
+                      {r.status === "Baru" && <button className="act act-pr" onClick={() => openStatus(r, "Diproses")}>Proses</button>}
+                      {r.status !== "Selesai" && <button className="act act-sl" onClick={() => openStatus(r, "Selesai")}>Selesai</button>}
+                      {r.status === "Selesai" && <span className="muted td-s">—</span>}
                     </td>
                   </tr>
                 );
@@ -346,24 +342,46 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
         )}
       </div>
 
-      {noteItem && (
-        <div className="ov" onClick={() => setNoteItem(null)}>
-          <div className="note-modal" onClick={(e) => e.stopPropagation()}>
+      {stItem && (
+        <div className="ov" onClick={() => setStItem(null)}>
+          <div className={"note-modal st-modal st-" + (stItem.target === "Selesai" ? "sl" : "pr")} onClick={(e) => e.stopPropagation()}>
             <div className="note-modal-h">
               <div>
-                <b>Catatan Aduan</b>
-                <div className="muted td-s">{noteItem.nama} · {noteItem.kategori}</div>
+                <b>{stItem.target === "Selesai" ? "✅" : "⏳"} Ubah status → {stItem.target}</b>
+                <div className="muted td-s">{stItem.item.kode} · {stItem.item.nama} · {stItem.item.kategori}</div>
               </div>
-              <button className="x" onClick={() => setNoteItem(null)}>×</button>
+              <button className="x" onClick={() => setStItem(null)}>×</button>
             </div>
             <div className="note-modal-b">
-              <div className="note-ctx">{noteItem.deskripsi}</div>
-              <label className="note-lbl">Catatan / keterangan admin</label>
-              <textarea className="note-ta" value={noteText} onChange={(e) => setNoteText(e.target.value)}
-                placeholder="mis. Sudah dihubungi via WA, menunggu kelengkapan berkas…" />
+              <div className={"st-wajib st-w-" + (stItem.target === "Selesai" ? "sl" : "pr")}>
+                <span>⚠️</span>
+                <div>
+                  {stItem.target === "Selesai"
+                    ? <>Wajib isi catatan. Mahasiswa perlu tahu <b>apa hasilnya</b> dan <b>apa yang harus dia lakukan</b>.</>
+                    : <>Wajib isi catatan. Mahasiswa perlu tahu <b>sedang diapakan</b> aduannya dan <b>berapa lama</b> kira-kira.</>}
+                  {" "}Catatan ini <b>langsung tampil</b> ke mahasiswa di menu Hasil Laporan.
+                </div>
+              </div>
+
+              <div className="note-ctx">{stItem.item.deskripsi}</div>
+
+              <label className="note-lbl">Jawaban cepat <span className="muted">(klik untuk mengisi, masih bisa diedit)</span></label>
+              <div className="st-chips">
+                {(BALASAN_CEPAT[stItem.target] || []).map((t, i) => (
+                  <button key={i} className="st-chip" onClick={() => { setStText(t); setStErr(""); }}>{t}</button>
+                ))}
+              </div>
+
+              <label className="note-lbl">Catatan untuk mahasiswa <span className="muted">(wajib)</span></label>
+              <textarea className="note-ta" value={stText} onChange={(e) => { setStText(e.target.value); setStErr(""); }}
+                placeholder="Tulis catatan… mis. alasan, langkah selanjutnya, atau apa yang harus dilakukan mahasiswa." />
+              {stErr && <div className="st-err">{stErr}</div>}
+
               <div className="note-actions">
-                <button className="btn-g" onClick={() => setNoteItem(null)}>Batal</button>
-                <button className="btn-p" onClick={saveNote} disabled={savingNote}>{savingNote ? "Menyimpan…" : "Simpan Catatan"}</button>
+                <button className="btn-g" onClick={() => setStItem(null)}>Batal</button>
+                <button className={"btn-p st-btn-" + (stItem.target === "Selesai" ? "sl" : "pr")} onClick={simpanStatus} disabled={stSaving}>
+                  {stSaving ? "Menyimpan…" : "Simpan & Ubah Status"}
+                </button>
               </div>
             </div>
           </div>

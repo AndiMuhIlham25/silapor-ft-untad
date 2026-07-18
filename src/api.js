@@ -20,8 +20,8 @@ export const apiLogin = (username, password, ua) => post({ action: "login", user
 export const apiList = (token) => post({ action: "list", token });
 export const apiPublic = () => post({ action: "public", token: TOKEN });
 export const apiSubmit = (payload) => post({ action: "submit", token: TOKEN, ...payload });
-export const apiUpdateStatus = (token, item, status) =>
-  post({ action: "updateStatus", token, ssId: item.ssId, sheet: item.sheet, row: item.row, status });
+export const apiUpdateStatus = (token, item, status, catatan) =>
+  post({ action: "updateStatus", token, ssId: item.ssId, sheet: item.sheet, row: item.row, status, catatan });
 export const apiNote = (token, item, catatan) =>
   post({ action: "note", token, ssId: item.ssId, sheet: item.sheet, row: item.row, catatan });
 

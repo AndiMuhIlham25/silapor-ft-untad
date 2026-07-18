@@ -62,3 +62,21 @@ export const AREAS = [
   { id: "operator", label: "Operator / SIGA-8 (fungsional)" },
   { id: "umum", label: "Umum" },
 ];
+
+/* Jawaban cepat catatan admin (pengisi awal — tetap bisa diedit) */
+export const BALASAN_CEPAT = {
+  Diproses: [
+    "Aduan Anda sedang kami telaah. Mohon tunggu maksimal 1×24 jam kerja.",
+    "Sudah diteruskan ke Prodi/Jurusan terkait untuk ditindaklanjuti.",
+    "Sudah diteruskan ke dosen pengampu mata kuliah bersangkutan.",
+    "Silakan ke loket 3, temui Pak Ilham untuk proses permasalahan SIGA-8 kamu.",
+    "Mohon bawa bukti pendukungmu ke loket dan menghadap ke saya.",
+  ],
+  Selesai: [
+    "Surat sudah selesai. Silakan ambil di loket TU Fakultas Teknik pada jam kerja.",
+    "Nilai sudah diinput/diperbaiki dosen pengampu. Silakan cek KHS Anda.",
+    "Akun sudah direset. Cek email kampus Anda untuk password baru.",
+    "KRS sudah disetujui/diperbaiki. Silakan cek kembali.",
+    "Data sudah diperbarui dan disinkronkan. Silakan cek di SIGA-8.",
+  ],
+};

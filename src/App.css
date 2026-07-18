@@ -509,3 +509,21 @@ body { overflow-x: hidden; }
 .ok-ids .ok-id { margin: 0; padding: 11px 8px; }
 .ok-ids .ok-id div { font-size: 15px; word-break: break-all; }
 @media (max-width: 420px) { .ok-ids { grid-template-columns: 1fr; } }
+
+/* ===== Modal ubah status (catatan wajib) ===== */
+.st-modal { max-width: 560px; }
+.st-wajib { display: flex; gap: 9px; align-items: flex-start; font-size: 12.5px; line-height: 1.55; padding: 11px 13px; border-radius: 11px; margin-bottom: 14px; }
+.st-w-pr { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.st-w-sl { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.st-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.st-chip { font-size: 11.5px; font-weight: 600; padding: 7px 11px; border-radius: 9px; cursor: pointer; border: 1px solid #d7dfea; background: #f8fafc; color: #475569; text-align: left; line-height: 1.4; }
+.st-chip:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.st-err { font-size: 12px; color: #b91c1c; margin-top: 7px; }
+.st-btn-pr { background: linear-gradient(135deg,#d97706,#b45309) !important; }
+.st-btn-sl { background: linear-gradient(135deg,#059669,#047857) !important; }
+.act-pr { color: #b45309; border-color: #fde68a; background: #fffbeb; }
+.act-sl { color: #047857; border-color: #a7f3d0; background: #ecfdf5; }
+.act-pr:hover, .act-sl:hover { filter: brightness(.97); }
+
+/* popup sukses: varian jam kerja (hijau) */
+.ok-ic-kerja { background: #ecfdf5; border: 2px solid #a7f3d0; }

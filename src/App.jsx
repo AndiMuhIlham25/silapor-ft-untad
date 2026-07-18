@@ -42,6 +42,25 @@ export default function App() {
 
   const fireToast = (m) => { setToast(m); setTimeout(() => setToast(null), 2800); };
 
+  const LACAK_TEKS = "Simpan ID di bawah untuk memantau statusnya atau ketik Stambuk/NIP Anda untuk melihat apa saja yang telah Anda lapor.";
+  const suksesInfo = (s) => {
+    if (!s.luarJam) return {
+      ic: "✅", cls: "ok-ic-kerja", judul: "Aduan berhasil terkirim",
+      body: "Aduan sudah diteruskan ke admin prodi terkait dan akan segera ditindaklanjuti. " + LACAK_TEKS,
+      sub: <>Pantau statusnya di menu <b>Hasil Laporan</b>.</>,
+    };
+    if (s.akhirPekan) return {
+      ic: "📅", cls: "ok-ic-pekan", judul: "Aduan kamu sudah direkam",
+      body: "Aduan akan diproses sesuai dengan hari kerja. Karena masuk di akhir pekan, aduan akan ditindaklanjuti mulai hari Senin pukul 08.00 WITA. " + LACAK_TEKS,
+      sub: <>Aduan tetap diteruskan ke admin prodi terkait. Pantau statusnya di menu <b>Hasil Laporan</b>.</>,
+    };
+    return {
+      ic: "📝", cls: "ok-ic-jam", judul: "Aduan kamu sudah direkam",
+      body: "Aduan akan diproses sesuai dengan hari kerja (Senin–Jumat, mulai pukul 08.00 WITA). " + LACAK_TEKS,
+      sub: <>Aduan tetap diteruskan ke admin prodi terkait. Pantau statusnya di menu <b>Hasil Laporan</b>.</>,
+    };
+  };
+
   const pickLayanan = (k) => {
     setForm((f) => {
       const role = k.roles.includes(f.role) ? f.role : k.roles[0];
@@ -110,8 +129,12 @@ export default function App() {
     if (result.ok) {
       setForm(EMPTY_FORM); setErrors({}); formT0.current = Date.now();
       setDupWarn(null);
-      if (result.luarJam) setSukses({ ticket: result.ticket, akhirPekan: !!result.akhirPekan, stambuk: payload.identitas });
-      else fireToast("Aduan terkirim · ID " + (result.ticket || "-") + " — simpan untuk lacak status");
+      setSukses({
+        ticket: result.ticket,
+        luarJam: !!result.luarJam,
+        akhirPekan: !!result.akhirPekan,
+        stambuk: payload.identitas,
+      });
     } else {
       setDupWarn(null);
       fireToast(result.error || "Gagal kirim — cek koneksi/URL");
@@ -142,36 +165,32 @@ export default function App() {
           SILAPOR FT UNTAD — Sistem Pengaduan Layanan Akademik · Fakultas Teknik, Universitas Tadulako
         </footer>
       </div>
-      {sukses && (
-        <div className="ov" onClick={() => setSukses(null)}>
-          <div className="ok-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="ok-top">
-              <div className={"ok-ic " + (sukses.akhirPekan ? "ok-ic-pekan" : "ok-ic-jam")}>
-                {sukses.akhirPekan ? "📅" : "📝"}
-              </div>
-              <b>Aduan kamu sudah direkam</b>
-              <p>
-                {sukses.akhirPekan
-                  ? "Aduan akan diproses sesuai dengan hari kerja. Karena masuk di akhir pekan, aduan akan ditindaklanjuti mulai hari Senin pukul 08.00 WITA. "
-                  : "Aduan akan diproses sesuai dengan hari kerja (Senin–Jumat, mulai pukul 08.00 WITA). "}
-                Simpan ID di bawah untuk memantau statusnya atau ketik Stambuk/NIP Anda untuk melihat apa saja yang telah Anda lapor.
-              </p>
-              <div className="ok-ids">
-                <div className="ok-id">
-                  <small>Stambuk / NIP</small>
-                  <div>{sukses.stambuk || "-"}</div>
+      {sukses && (() => {
+        const info = suksesInfo(sukses);
+        return (
+          <div className="ov" onClick={() => setSukses(null)}>
+            <div className="ok-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="ok-top">
+                <div className={"ok-ic " + info.cls}>{info.ic}</div>
+                <b>{info.judul}</b>
+                <p>{info.body}</p>
+                <div className="ok-ids">
+                  <div className="ok-id">
+                    <small>Stambuk / NIP</small>
+                    <div>{sukses.stambuk || "-"}</div>
+                  </div>
+                  <div className="ok-id">
+                    <small>ID Aduan</small>
+                    <div>{sukses.ticket || "-"}</div>
+                  </div>
                 </div>
-                <div className="ok-id">
-                  <small>ID Aduan</small>
-                  <div>{sukses.ticket || "-"}</div>
-                </div>
+                <p className="ok-sub">{info.sub}</p>
               </div>
-              <p className="ok-sub">Aduan tetap diteruskan ke admin prodi terkait. Pantau statusnya di menu <b>Hasil Laporan</b>.</p>
+              <div className="ok-foot"><button onClick={() => setSukses(null)}>Mengerti</button></div>
             </div>
-            <div className="ok-foot"><button onClick={() => setSukses(null)}>Mengerti</button></div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {dupWarn && (
         <div className="ov" onClick={() => setDupWarn(null)}>

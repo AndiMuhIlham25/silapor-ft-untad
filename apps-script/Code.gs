@@ -448,10 +448,14 @@ function handleList(b){
 function handleUpdate(b){
   var s=getSession(b.token); if(!s) return json({ok:false,error:"Sesi berakhir, login ulang"});
   if(!canEditTab(s,b.ssId,b.sheet)) return json({ok:false,error:"Tidak berhak mengubah data ini"});
+  var cat=String(b.catatan||"").trim();
+  if(cat.length<5) return json({ok:false,error:"Catatan wajib diisi (minimal 5 karakter)"});
+  if(cat.length>1000) return json({ok:false,error:"Catatan terlalu panjang (maks 1000 karakter)"});
   var sh=SpreadsheetApp.openById(extractId(b.ssId)).getSheetByName(b.sheet);
   if(!sh) return json({ok:false,error:"Tab tidak ditemukan"});
   sh.getRange(b.row,9).setValue(b.status);
-  logAksi(s.u, s.role, "Ubah status", s.ua||"");
+  sh.getRange(b.row,10).setValue(safeCell(cat));
+  logAksi(s.u, s.role, "Ubah status → "+b.status, s.ua||"");
   return json({ok:true});
 }
 function handleNote(b){
