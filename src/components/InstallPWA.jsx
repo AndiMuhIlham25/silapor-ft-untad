@@ -50,7 +50,7 @@ export default function InstallPWA() {
 
   return (
     <div className="pwa-bar">
-      <img src="./icon-192.png" alt="" className="pwa-ic" />
+      <img src="/icon-192.png" alt="" className="pwa-ic" />
       <div className="pwa-txt">
         <b>Pasang aplikasi SILAPOR</b>
         <span>Akses lebih cepat, tampil layar penuh seperti aplikasi.</span>

@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "./",
+  base: "/",   // domain root (Netlify). Ubah ke "./" bila dipasang di subfolder.
   plugins: [
     react(),
     VitePWA({
@@ -15,9 +15,13 @@ export default defineConfig({
         description:
           "Portal pengaduan pelayanan sistem akademik Fakultas Teknik Universitas Tadulako.",
         lang: "id",
-        start_url: ".",
-        scope: ".",
+        // WAJIB absolut: nilai relatif (".") sering gagal divalidasi Chrome,
+        // akibatnya hanya dibuat pintasan biasa -> terbuka dengan address bar.
+        id: "/",
+        start_url: "/",
+        scope: "/",
         display: "standalone",
+        display_override: ["standalone", "minimal-ui"],
         orientation: "portrait",
         background_color: "#f4f7fb",
         theme_color: "#1d4ed8",
@@ -28,8 +32,8 @@ export default defineConfig({
           { src: "icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
         shortcuts: [
-          { name: "Buat Aduan", short_name: "Aduan", url: "./#beranda" },
-          { name: "Lacak Aduan", short_name: "Lacak", url: "./#laporan" },
+          { name: "Buat Aduan", short_name: "Aduan", url: "/#beranda" },
+          { name: "Lacak Aduan", short_name: "Lacak", url: "/#laporan" },
         ],
       },
       workbox: {
@@ -59,7 +63,7 @@ export default defineConfig({
           },
         ],
         // JANGAN cache Apps Script: data aduan harus selalu terbaru
-        navigateFallbackDenylist: [/^\/api/, /script\.google\.com/],
+        navigateFallbackDenylist: [/^\/api/, /script\.google\.com/, /^\/\.well-known\//],
       },
       devOptions: { enabled: false },
     }),
