@@ -7,7 +7,7 @@ export default function Hero({ onBuat, onLayanan }) {
     <section className={"hero-simple hero-cuaca mood-" + mood} id="beranda">
       <CuacaBackground onMood={setMood} />
       <div className="hero-content">
-        <span className="tag"><span className="tag-dot" /> Mahasiswa · Dosen · Operator Prodi/Jurusan</span>
+        <span className="tag"><span className="tag-dot" /> Mahasiswa · Dosen · Operator Prodi</span>
         <h1>Sampaikan <span className="g">kendala akademik Anda.</span></h1>
         <p>
           Portal pengaduan pelayanan sistem akademik Fakultas Teknik Universitas Tadulako.

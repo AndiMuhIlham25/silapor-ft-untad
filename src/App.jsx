@@ -8,6 +8,8 @@ import LaporanPublik from "./components/LaporanPublik.jsx";
 import Toast from "./components/Toast.jsx";
 import Chatbot from "./components/Chatbot.jsx";
 import CuacaBand from "./components/CuacaBand.jsx";
+import InstallPWA from "./components/InstallPWA.jsx";
+import BottomNav from "./components/BottomNav.jsx";
 
 const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "", file: null };
 
@@ -46,7 +48,7 @@ export default function App() {
   const suksesInfo = (s) => {
     if (!s.luarJam) return {
       ic: "✅", cls: "ok-ic-kerja", judul: "Aduan berhasil terkirim",
-      body: "Aduan sudah diteruskan ke admin terkait dan akan segera ditindaklanjuti. " + LACAK_TEKS,
+      body: "Aduan sudah diteruskan ke admin prodi terkait dan akan segera ditindaklanjuti. " + LACAK_TEKS,
       sub: <>Pantau statusnya di menu <b>Hasil Laporan</b>.</>,
     };
     if (s.akhirPekan) return {
@@ -223,6 +225,8 @@ export default function App() {
       )}
       <Toast message={toast} />
       <Chatbot />
+      <InstallPWA />
+      <BottomNav view={view} nav={nav} onLoginAdmin={loginAdmin} />
     </>
   );
 }

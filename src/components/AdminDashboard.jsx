@@ -84,7 +84,7 @@ export default function AdminDashboard({ session, onLogout, onProfile, onManageA
 
   // judul tab browser ikut menandai aduan baru
   useEffect(() => {
-    document.title = newCount > 0 ? `(${newCount}) Aduan baru · SILAPOR` : "SILAPOR FT UNTAD — Panel Admin";
+    document.title = newCount > 0 ? `(${newCount}) Aduan baru · SILAPOR` : "SILAPOR — Panel Admin";
   }, [newCount]);
 
   const lihatBaru = () => { setFStatus("Baru"); setQ(""); setNewCount(0); window.scrollTo({ top: 0, behavior: "smooth" }); };

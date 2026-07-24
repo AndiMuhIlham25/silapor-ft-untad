@@ -527,3 +527,205 @@ body { overflow-x: hidden; }
 
 /* popup sukses: varian jam kerja (hijau) */
 .ok-ic-kerja { background: #ecfdf5; border: 2px solid #a7f3d0; }
+
+/* ===== Banner pasang aplikasi (PWA) ===== */
+.pwa-bar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px; z-index: 1200;
+  width: min(460px, calc(100vw - 28px)); display: flex; align-items: center; gap: 12px;
+  background: #fff; border: 1px solid #e6ebf2; border-radius: 16px; padding: 12px 14px;
+  box-shadow: 0 18px 44px rgba(15,23,42,.18); animation: pwaUp .35s ease; }
+@keyframes pwaUp { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.pwa-ic { width: 40px; height: 40px; border-radius: 11px; flex: 0 0 auto; border: 1px solid #eef2f7; }
+.pwa-txt { flex: 1; min-width: 0; }
+.pwa-txt b { display: block; font-size: 13.5px; }
+.pwa-txt span { display: block; font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin-top: 2px; }
+.pwa-btn { border: 0; background: linear-gradient(135deg,#1d4ed8,#0891b2); color: #fff; font-weight: 700;
+  font-size: 13px; padding: 10px 16px; border-radius: 10px; cursor: pointer; flex: 0 0 auto; }
+.pwa-x { border: 0; background: transparent; color: #94a3b8; font-size: 19px; cursor: pointer; padding: 0 2px; flex: 0 0 auto; }
+@media (max-width: 420px) { .pwa-bar { bottom: 14px; } .pwa-txt span { display: none; } }
+
+/* beri ruang agar tombol chat tidak tertutup banner */
+.pwa-bar ~ .cb-fab { bottom: 92px; }
+
+/* ============================================================
+   PERAPIAN TAMPILAN HP (≤560px)
+   Masalah yang dibereskan: badge peran meluber keluar hero,
+   hero terlalu tinggi sehingga form tak terlihat, tombol chat
+   menutupi isi form, dan area sentuh yang terlalu kecil.
+   ============================================================ */
+@media (max-width: 560px) {
+  /* badge peran: boleh turun baris, tidak lagi meluber */
+  .tag {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    max-width: 100%; font-size: 11px; padding: 6px 12px;
+    line-height: 1.5; text-align: center; white-space: normal;
+  }
+
+  /* hero: cukup tinggi untuk berkesan, tapi form tetap terlihat */
+  .hero-cuaca { min-height: 62vh !important; }
+  .band-cuaca { min-height: 34vh !important; }
+  .hero-cuaca .hero-content { padding: 26px 18px 34px; }
+  .hero-cuaca h1 { font-size: clamp(27px, 8.5vw, 38px) !important; letter-spacing: -1px; }
+  .hero-cuaca p { font-size: 13px; line-height: 1.6; margin-bottom: 20px; }
+
+  /* tombol hero: lebar penuh, enak disentuh */
+  .hero-btns { flex-direction: column; width: 100%; gap: 9px; }
+  .hero-btns button { width: 100%; padding: 14px 18px; font-size: 14px; }
+
+  /* form & kartu lebih rapat, tidak boros ruang */
+  .sec { padding: 26px 0; }
+  .form-card { padding: 18px 15px; border-radius: 16px; }
+  .frow { gap: 12px; margin-bottom: 12px; }
+  .field label { font-size: 12px; }
+  .field input, .field select, .field textarea { padding: 12px 13px; font-size: 15px; }
+  .chip { padding: 9px 13px; font-size: 12.5px; }
+
+  /* ruang bawah agar tombol chat tak menutupi tombol Kirim */
+  .wrap { padding-bottom: 84px; }
+
+  /* tombol chat sedikit lebih kecil di layar sempit */
+  .cb-fab { width: 50px; height: 50px; right: 16px; bottom: 16px; }
+  .cb-panel { right: 12px; bottom: 76px; height: 62vh; }
+
+  /* banner pasang app tidak menabrak tombol chat */
+  .pwa-bar { bottom: 78px; }
+
+  /* kartu hasil lacak & tabel */
+  .lacak-item { padding: 13px 14px; }
+  .sec-h h2 { font-size: 22px; }
+}
+
+/* layar sangat sempit (≤380px) */
+@media (max-width: 380px) {
+  .hero-cuaca h1 { font-size: 25px !important; }
+  .tag { font-size: 10.5px; }
+  .cu-chip { font-size: 10.5px; padding: 4px 9px; top: 12px; right: 12px; }
+}
+
+/* aman untuk HP berponi (notch) saat dibuka sebagai aplikasi */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .cb-fab { bottom: calc(16px + env(safe-area-inset-bottom)); }
+  .pwa-bar { bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .hd { padding-top: env(safe-area-inset-top); }
+}
+
+/* ============================================================
+   NAVIGASI BAWAH (tampilan HP) — menggantikan menu atas yang
+   sebelumnya hilang di layar kecil, sehingga Layanan & Hasil
+   Laporan kembali terjangkau dengan jempol.
+   ============================================================ */
+.bnav { display: none; }
+
+@media (max-width: 900px) {
+  .bnav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 1100;
+    background: rgba(255,255,255,.97); backdrop-filter: blur(12px);
+    border-top: 1px solid #e6ebf2; box-shadow: 0 -4px 18px rgba(15,23,42,.06);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bnav-i {
+    flex: 1; border: 0; background: transparent; color: #94a3b8;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 4px 8px; font-size: 10.5px; font-weight: 600; cursor: pointer;
+    transition: color .15s;
+  }
+  .bnav-i svg { width: 21px; height: 21px; }
+  .bnav-i.on { color: #1d4ed8; }
+  .bnav-i.on svg { stroke-width: 2.1; }
+
+  /* header: ringkas, tombol admin pindah ke navigasi bawah */
+  .hd-cta { display: none; }
+  .hd-in { padding: 10px 16px; gap: 10px; }
+  .hd .crest-img { width: 36px; height: 36px; border-radius: 10px; }
+  .hd b { font-size: 13.5px; }
+  .hd small { font-size: 10px; }
+
+  /* ruang bawah agar isi tidak tertutup navigasi */
+  .wrap, .admin-wrap { padding-bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .cb-fab { bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .cb-panel { bottom: calc(132px + env(safe-area-inset-bottom)); }
+  /* banner pasang aplikasi dipindah ke atas agar tak bertabrakan */
+  .pwa-bar { top: 74px; bottom: auto !important; }
+}
+
+/* ============================================================
+   TABEL → KARTU (HP). Tabel admin/log/super tidak lagi perlu
+   digeser ke samping; tiap baris jadi satu kartu utuh.
+   ============================================================ */
+@media (max-width: 640px) {
+  .tblw { border: 0; background: transparent; box-shadow: none; overflow: visible; border-radius: 0; }
+  .tbl { min-width: 0; }
+  .tbl thead { display: none; }
+  .tbl, .tbl tbody, .tbl tr, .tbl td { display: block; width: 100%; }
+  .tbl tr {
+    background: #fff; border: 1px solid #e6ebf2; border-radius: 14px;
+    padding: 13px 15px; margin-bottom: 10px; box-shadow: 0 4px 14px rgba(15,23,42,.04);
+  }
+  .tbl tr:hover td { background: transparent; }
+  .tbl td { border-top: 0; padding: 3px 0; font-size: 13px; }
+  .tbl td.ta-r {
+    display: flex; gap: 8px; text-align: left;
+    margin-top: 9px; padding-top: 10px; border-top: 1px solid #eef2f7;
+  }
+  .tbl td.ta-r .act { flex: 1; text-align: center; padding: 9px 8px; font-size: 12px; }
+  .tbl .emptyrow { text-align: center; color: #94a3b8; padding: 20px 0; }
+  .row-new { background: #f0f9ff !important; border-color: #bfdbfe !important; }
+  .row-new td { background: transparent !important; }
+  .log-tblw { max-height: none; }
+
+  /* paginasi ringkas */
+  .pager { flex-direction: column; gap: 10px; }
+  .pager-ctrl button { min-width: 32px; height: 32px; }
+}
+
+/* ============================================================
+   PANEL ADMIN di HP
+   ============================================================ */
+@media (max-width: 640px) {
+  .admin-hd-in { flex-wrap: wrap; padding: 10px 14px; gap: 10px; }
+  .admin-hd-in > div:nth-child(2) { flex: 1; min-width: 0; }
+  .admin-hd b { font-size: 13px; }
+  .admin-hd small { font-size: 10.5px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .admin-hd-r { width: 100%; margin-left: 0; gap: 6px; }
+  .admin-hd-r button { flex: 1; padding: 9px 6px; font-size: 12px; }
+  .admin-crest.crest-img { width: 34px; height: 34px; }
+  .admin-wrap { padding-left: 14px; padding-right: 14px; }
+  .card { padding: 15px; }
+  .donut-wrap { flex-direction: column; gap: 14px; }
+  .super-top { flex-direction: column; align-items: stretch; gap: 10px; }
+  .super-top .btn-p { width: 100%; }
+  .arsip-box { flex-direction: column; align-items: stretch; }
+  .arsip-box select, .arsip-btn { width: 100%; }
+  .new-alert { font-size: 13px; padding: 12px 13px; }
+  .log-card-h { flex-direction: column; align-items: stretch; gap: 10px; }
+}
+
+/* ============================================================
+   MODAL jadi bottom-sheet di HP (lebih mudah dijangkau jempol)
+   ============================================================ */
+@media (max-width: 560px) {
+  .ov { align-items: flex-end; padding: 0; }
+  .note-modal, .ok-modal {
+    max-width: 100%; width: 100%;
+    border-radius: 20px 20px 0 0; max-height: 92vh;
+    animation: sheetUp .28s ease;
+  }
+  @keyframes sheetUp { from { transform: translateY(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+  .note-modal-b, .ok-top { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+  .note-actions { flex-direction: column-reverse; }
+  .note-actions button { width: 100%; padding: 13px; }
+  .st-chip { width: 100%; }
+  .ok-foot { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
+
+  /* chatbot hampir satu layar penuh */
+  .cb-panel {
+    right: 10px; left: 10px; width: auto; height: 68vh;
+    bottom: calc(126px + env(safe-area-inset-bottom));
+  }
+}
+
+/* kartu layanan & isi lain */
+@media (max-width: 560px) {
+  .svc { padding: 15px; }
+  .lacak-box .btn-p { width: 100%; }
+  .barlist .bn { width: 88px; font-size: 11.5px; }
+}
