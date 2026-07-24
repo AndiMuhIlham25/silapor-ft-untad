@@ -38,8 +38,17 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,png,svg,woff2}"],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         navigateFallback: "index.html",
         runtimeCaching: [
+          {
+            // manifest & registerSW: selalu ambil versi terbaru
+            urlPattern: /\/(manifest\.webmanifest|registerSW\.js)$/,
+            handler: "NetworkFirst",
+            options: { cacheName: "app-manifest", expiration: { maxEntries: 4 } },
+          },
           {
             // font Google: cache lama
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,

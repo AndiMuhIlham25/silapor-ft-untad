@@ -10,6 +10,7 @@ import Chatbot from "./components/Chatbot.jsx";
 import CuacaBand from "./components/CuacaBand.jsx";
 import InstallPWA from "./components/InstallPWA.jsx";
 import BottomNav from "./components/BottomNav.jsx";
+import Diagnosa from "./components/Diagnosa.jsx";
 
 const EMPTY_FORM = { nama: "", identitas: "", prodi: "", role: "Mahasiswa", kategori: "", prioritas: "Sedang", deskripsi: "", hp: "", file: null };
 
@@ -29,7 +30,7 @@ export default function App() {
     return () => window.removeEventListener("hashchange", on);
   }, []);
 
-  const view = hash === "#layanan" ? "layanan" : hash === "#laporan" ? "laporan" : "beranda";
+  const view = hash === "#layanan" ? "layanan" : hash === "#laporan" ? "laporan" : hash === "#diagnosa" ? "diagnosa" : "beranda";
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   const scrollForm = () => setTimeout(() => document.getElementById("aduan")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
@@ -158,6 +159,8 @@ export default function App() {
       <div className="wrap">
         {view === "layanan" ? (
           <div className="layanan-page"><Layanan onPick={pickLayanan} /></div>
+        ) : view === "diagnosa" ? (
+          <Diagnosa />
         ) : view === "laporan" ? (
           <LaporanPublik />
         ) : (
