@@ -77,7 +77,7 @@ export default function LaporanPublik() {
           value={stambuk}
           onChange={(e) => setStambuk(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && lacak()}
-          placeholder="Ketik Stambuk/NIP atau ID Aduan — mis. F12122088 atau ADU-260717-4231"
+          placeholder="Ketik Stambuk/NIP atau ID Aduan"
         />
         <button className="btn-p" onClick={lacak} disabled={cari}>{cari ? "Mencari…" : "Lacak Aduan"}</button>
       </div>
