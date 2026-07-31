@@ -13,7 +13,7 @@ export default function Header({ view, nav, onLoginAdmin }) {
       <div className="hd-in">
         <img className="crest crest-img" src={logoUntad} alt="Logo Untad" />
         <div className="hd-brand">
-          <b>SILAPOR FT UNTAD</b>
+          <b>TEKAD FT UNTAD</b>
           <small>Pengaduan Layanan Akademik · Fakultas Teknik</small>
         </div>
         <nav className="hd-nav">

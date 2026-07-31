@@ -25,7 +25,7 @@ export default function AdminLogin({ onLogin }) {
       <div className="login-card">
         <img className="login-crest crest-img" src={logoUntad} alt="Logo Untad" />
         <h1>Login Admin</h1>
-        <p className="login-sub">SILAPOR FT UNTAD · Panel Admin Prodi</p>
+        <p className="login-sub">TEKAD FT UNTAD · Panel Admin Prodi</p>
 
         <div className="login-field">
           <label>Username</label>

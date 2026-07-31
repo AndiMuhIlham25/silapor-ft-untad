@@ -1,8 +1,8 @@
 {
   "packageId": "id.ac.untad.ft.silapor",
   "host": "tekad-ft-untad.netlify.app",
-  "name": "SILAPOR — Pengaduan Layanan Akademik FT UNTAD",
-  "launcherName": "SILAPOR",
+  "name": "TEKAD — Pengaduan Layanan Akademik FT UNTAD",
+  "launcherName": "TEKAD",
   "display": "standalone",
   "orientation": "portrait",
   "themeColor": "#1D4ED8",

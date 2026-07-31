@@ -89,7 +89,7 @@ export default function Diagnosa() {
       <div className="diag-tip">
         <b>Kalau masih tampil bilah alamat:</b>
         <ol>
-          <li>Hapus ikon SILAPOR yang lama dari layar utama</li>
+          <li>Hapus ikon TEKAD yang lama dari layar utama</li>
           <li>Buka alamat situs langsung di <b>Chrome</b> — bukan dari tautan WhatsApp/Instagram
               (tautan dari aplikasi lain selalu dibuka sebagai Custom Tab yang memang berbilah alamat)</li>
           <li>Menu ⋮ → <b>Install app / Pasang aplikasi</b> (bukan “Tambahkan ke layar utama”)</li>

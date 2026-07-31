@@ -10,8 +10,8 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "apple-touch-icon.png"],
       manifest: {
-        name: "SILAPOR — Pengaduan Layanan Akademik FT UNTAD",
-        short_name: "SILAPOR",
+        name: "TEKAD — Pengaduan Layanan Akademik FT UNTAD",
+        short_name: "TEKAD",
         description:
           "Portal pengaduan pelayanan sistem akademik Fakultas Teknik Universitas Tadulako.",
         lang: "id",

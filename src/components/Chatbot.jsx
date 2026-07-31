@@ -4,7 +4,7 @@ import AsistenAvatar from "./AsistenAvatar.jsx";
 // Basis pengetahuan (rule-based) — cocokkan kata kunci, ambil skor tertinggi
 const FAQ = [
   { key: "salam", kw: ["halo", "hai", "hallo", "assalam", "selamat pagi", "selamat siang", "selamat sore", "permisi"],
-    a: "Hai! 👋 Aku asisten SILAPOR FT UNTAD. Ada yang bisa dibantu soal pengaduan layanan akademik?" },
+    a: "Hai! 👋 Aku asisten TEKAD FT UNTAD. Ada yang bisa dibantu soal pengaduan layanan akademik?" },
   { key: "terima", kw: ["terima kasih", "makasih", "thanks", "thx", "mksh", "trims"],
     a: "Sama-sama! 🙌 Semoga urusannya lancar ya." },
   { key: "ngadu", kw: ["cara ngadu", "cara buat", "cara lapor", "cara mengadu", "buat aduan", "mengadu", "melapor", "ngadu", "kirim aduan", "gimana lapor"],
@@ -51,7 +51,7 @@ function jawab(text) {
 export default function Chatbot() {
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState([
-    { from: "bot", text: "Hai! 👋 Aku asisten SILAPOR. Tanya apa aja soal cara mengadu, jam layanan, atau cek status aduan." },
+    { from: "bot", text: "Hai! 👋 Aku asisten TEKAD. Tanya apa aja soal cara mengadu, jam layanan, atau cek status aduan." },
   ]);
   const [input, setInput] = useState("");
   const bodyRef = useRef(null);
@@ -80,7 +80,7 @@ export default function Chatbot() {
             <div className="cb-avatar"><AsistenAvatar size={46} /></div>
             <div>
               <b>Tanya Sila</b>
-              <small>Asisten SILAPOR · online</small>
+              <small>Asisten TEKAD · online</small>
             </div>
           </div>
 

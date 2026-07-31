@@ -167,7 +167,7 @@ export default function App() {
           <FormAduan form={form} setForm={setForm} errors={errors} onSubmit={submit} sending={sending} />
         )}
         <footer className="foot">
-          SILAPOR FT UNTAD — Sistem Pengaduan Layanan Akademik · Fakultas Teknik, Universitas Tadulako
+          TEKAD FT UNTAD — Sistem Pengaduan Layanan Akademik · Fakultas Teknik, Universitas Tadulako
         </footer>
       </div>
       {sukses && (() => {
