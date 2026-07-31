@@ -1,6 +1,6 @@
 {
   "packageId": "id.ac.untad.ft.silapor",
-  "host": "silapor-ft-untad.netlify.app",
+  "host": "tekad-ft-untad.netlify.app",
   "name": "SILAPOR — Pengaduan Layanan Akademik FT UNTAD",
   "launcherName": "SILAPOR",
   "display": "standalone",
@@ -14,24 +14,24 @@
   "backgroundColor": "#F4F7FB",
   "enableNotifications": false,
   "startUrl": "/",
-  "iconUrl": "https://silapor-ft-untad.netlify.app/icon-512.png",
-  "maskableIconUrl": "https://silapor-ft-untad.netlify.app/icon-maskable-512.png",
+  "iconUrl": "https://tekad-ft-untad.netlify.app/icon-512.png",
+  "maskableIconUrl": "https://tekad-ft-untad.netlify.app/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": { "path": "./android.keystore", "alias": "silapor" },
   "appVersionName": "1.0.0",
   "appVersionCode": 1,
   "shortcuts": [
-    { "name": "Buat Aduan", "shortName": "Aduan", "url": "/#beranda", "chosenIconUrl": "https://silapor-ft-untad.netlify.app/icon-192.png" },
-    { "name": "Lacak Aduan", "shortName": "Lacak", "url": "/#laporan", "chosenIconUrl": "https://silapor-ft-untad.netlify.app/icon-192.png" }
+    { "name": "Buat Aduan", "shortName": "Aduan", "url": "/#beranda", "chosenIconUrl": "https://tekad-ft-untad.netlify.app/icon-192.png" },
+    { "name": "Lacak Aduan", "shortName": "Lacak", "url": "/#laporan", "chosenIconUrl": "https://tekad-ft-untad.netlify.app/icon-192.png" }
   ],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://silapor-ft-untad.netlify.app/manifest.webmanifest",
+  "webManifestUrl": "https://tekad-ft-untad.netlify.app/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://silapor-ft-untad.netlify.app/",
+  "fullScopeUrl": "https://tekad-ft-untad.netlify.app/",
   "minSdkVersion": 21,
   "orientationLock": false
 }
