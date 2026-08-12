@@ -21,6 +21,8 @@ export const PRODI = [
   "Teknik Sipil (S2)",
   "Teknologi Informasi (S2)",
   "Arsitektur (S2)",
+  "Teknik Sipil Kampus Kab.Morowali (S1)",
+  "Teknik Sipil Kampus Kab. Tojo Una-una (S1)",
 ];
 
 /* Kategori masalah.
@@ -58,6 +60,8 @@ export const AREAS = [
   { id: "sipil_s2", label: "Teknik Sipil (S2)" },
   { id: "ti_s2", label: "Teknologi Informasi (S2)" },
   { id: "arsitektur_s2", label: "Arsitektur (S2)" },
+  { id: "sipil_morowali", label: "Teknik Sipil Kampus Kab.Morowali (S1)" },
+  { id: "sipil_tojo", label: "Teknik Sipil Kampus Kab. Tojo Una-una (S1)" },
   { id: "persuratan", label: "Persuratan (fungsional)" },
   { id: "operator", label: "Operator / SIGA-8 (fungsional)" },
   { id: "umum", label: "Umum" },
